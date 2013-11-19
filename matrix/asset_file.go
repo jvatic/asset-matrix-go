@@ -26,6 +26,8 @@ func NewAssetFile(path string) (*AssetFile, error) {
 func (file *AssetFile) ParseDirectives() error {
 	fileDesc, err := os.Open(file.Path)
 
+	defer fileDesc.Close()
+
 	if err != nil {
 		return err
 	}
