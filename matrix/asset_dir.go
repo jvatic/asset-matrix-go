@@ -19,15 +19,12 @@ func NewAssetDir(path string) (*AssetDir, error) {
 
 func (dir *AssetDir) scan() error {
 	absPath, err := filepath.Abs(dir.Path)
-
 	if err != nil {
 		return err
 	}
 
 	fmt.Printf("Scan dir: %s...\n", absPath)
-	err = filepath.Walk(dir.Path, dir.visit)
-
-	return err
+	return filepath.Walk(dir.Path, dir.visit)
 }
 
 func (dir *AssetDir) visit(path string, f os.FileInfo, err error) error {
@@ -36,21 +33,25 @@ func (dir *AssetDir) visit(path string, f os.FileInfo, err error) error {
 	}
 
 	if f.IsDir() {
-		subDir, _ := NewAssetDir(path)
-		subDir.scan()
+		subDir, err := NewAssetDir(path)
+		if err {
+			return err
+		}
+
+		err = subDir.scan()
+		if err {
+			return err
+		}
 
 		return filepath.SkipDir
 	}
 
 	file, err := NewAssetFile(path)
-
 	if err != nil {
 		return err
 	}
 
 	fmt.Printf("File: %s\n", file.Path)
 
-	err = file.ParseDirectives()
-
-	return err
+	return file.ParseDirectives()
 }

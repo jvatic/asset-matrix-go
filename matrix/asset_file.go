@@ -20,12 +20,11 @@ func NewAssetFile(path string) (*AssetFile, error) {
 
 func (asset *AssetFile) ParseDirectives() error {
 	file, err := os.Open(asset.Path)
-
-	defer file.Close()
-
 	if err != nil {
 		return err
 	}
+
+	defer file.Close()
 
 	var directives []*AssetDirective
 
