@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+
 	"github.com/tent/asset-matrix-go/matrix"
 )
 
