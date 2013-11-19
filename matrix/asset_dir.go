@@ -52,5 +52,5 @@ func (dir *AssetDir) visit(path string, f os.FileInfo, err error) error {
 
 	fmt.Printf("File: %s\n", file.Path)
 
-	return file.ParseDirectives()
+	return nil
 }
