@@ -5,17 +5,38 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 )
 
 type AssetFile struct {
-	Path           string
-	Directives     []*AssetDirective
-	dataByteOffset int
+	Path             string
+	Name             string
+	Directives       []*AssetDirective
+	Dir              *AssetDir
+	Manifest         *InputManifest
+	dataByteOffset   int
 }
 
-func NewAssetFile(path string) (*AssetFile, error) {
+var fileNameRegex = regexp.MustCompile("([^.]+)\\.?.*?\\z")
+
+func NewAssetFile(path string, manifest *InputManifest, dir *AssetDir) (*AssetFile, error) {
 	absPath, err := filepath.Abs(path)
-	return &AssetFile{Path: absPath}, err
+
+	nameMatch := fileNameRegex.FindAllStringSubmatch(filepath.Base(absPath), -1)
+	if len(nameMatch) < 1 || len(nameMatch[0]) < 2 {
+		return nil, fmt.Errorf("matrix: invalid path string: %s", path)
+	}
+	name := nameMatch[0][1]
+	if !dir.IsRoot {
+		name = filepath.Join(dir.Name, name)
+	}
+
+	asset := &AssetFile{Path: absPath, Name: name, Manifest: manifest, Dir: dir}
+
+	manifest.FilePathMapping[asset.Path] = asset
+	manifest.FileNameMapping[asset.Name] = asset
+
+	return asset, err
 }
 
 func (asset *AssetFile) ParseDirectives() error {
