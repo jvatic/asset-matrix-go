@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
 )
 
 type AssetFile struct {
@@ -42,15 +41,13 @@ func (file *AssetFile) ParseDirectives() error {
 		bytesRead = bytesRead + len(line)
 
 		// Ignore empty lines
-		lineEmpty, _ := regexp.MatchString("\\A\\s*\\z", line)
-		if lineEmpty {
+		if emptyLineRegex.MatchString(line) {
 			continue
 		}
 
 		// Only read directives
 		// which are always at the top of the file
-		matched, _ := regexp.MatchString(directiveRegexPattern, line)
-		if !matched {
+		if !directiveRegex.MatchString(line) {
 			break
 		}
 
