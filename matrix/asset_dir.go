@@ -14,12 +14,7 @@ type AssetDir struct {
 
 func NewAssetDir(path string) (*AssetDir, error) {
 	absPath, err := filepath.Abs(path)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &AssetDir{Path: absPath}, nil
+	return &AssetDir{Path: absPath}, err
 }
 
 func (dir *AssetDir) scan() error {

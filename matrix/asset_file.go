@@ -15,12 +15,7 @@ type AssetFile struct {
 
 func NewAssetFile(path string) (*AssetFile, error) {
 	absPath, err := filepath.Abs(path)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &AssetFile{Path: absPath}, nil
+	return &AssetFile{Path: absPath}, err
 }
 
 func (asset *AssetFile) ParseDirectives() error {
