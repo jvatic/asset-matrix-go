@@ -15,8 +15,7 @@ func main() {
 	inputPaths := flag.Args()
 
 	inputManifest := matrix.NewInputManifest(inputPaths, *outputDir)
-	err := inputManifest.ScanInputDirs()
-	if err != nil {
+	if err := inputManifest.ScanInputDirs(); err != nil {
 		fmt.Printf("Error: %s", err.Error())
 	}
 }
