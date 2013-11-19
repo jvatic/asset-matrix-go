@@ -34,12 +34,12 @@ func (dir *AssetDir) visit(path string, f os.FileInfo, err error) error {
 
 	if f.IsDir() {
 		subDir, err := NewAssetDir(path)
-		if err {
+		if err != nil {
 			return err
 		}
 
 		err = subDir.scan()
-		if err {
+		if err != nil {
 			return err
 		}
 
