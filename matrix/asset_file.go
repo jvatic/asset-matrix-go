@@ -36,22 +36,22 @@ func (file *AssetFile) ParseDirectives() error {
 
 	bytesRead := 0
 	for scanner.Scan() {
-		line := scanner.Text()
+		line := scanner.Bytes()
 
 		bytesRead = bytesRead + len(line)
 
 		// Ignore empty lines
-		if emptyLineRegex.MatchString(line) {
+		if emptyLineRegex.Match(line) {
 			continue
 		}
 
 		// Only read directives
 		// which are always at the top of the file
-		if !directiveRegex.MatchString(line) {
+		if !directiveRegex.Match(line) {
 			break
 		}
 
-		directive := NewAssetDirective(line)
+		directive := NewAssetDirective(string(line))
 
 		directives = append(directives, directive)
 
