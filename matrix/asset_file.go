@@ -15,18 +15,29 @@ type AssetFile struct {
 	Dir              *AssetDir
 	Manifest         *InputManifest
 	dataByteOffset   int
+	directivesParsed bool
 }
 
 var fileNameRegex = regexp.MustCompile("([^.]+)\\.?.*?\\z")
 
+func BuildAssetName(path string) (string, error) {
+	match := fileNameRegex.FindAllStringSubmatch(filepath.Base(path), -1)
+	if len(match) < 1 || len(match[0]) < 2 {
+		return "", fmt.Errorf("matrix: invalid path string: %s", path)
+	}
+	return match[0][1], nil
+}
+
 func NewAssetFile(path string, manifest *InputManifest, dir *AssetDir) (*AssetFile, error) {
 	absPath, err := filepath.Abs(path)
-
-	nameMatch := fileNameRegex.FindAllStringSubmatch(filepath.Base(absPath), -1)
-	if len(nameMatch) < 1 || len(nameMatch[0]) < 2 {
-		return nil, fmt.Errorf("matrix: invalid path string: %s", path)
+	if err != nil {
+		return nil, err
 	}
-	name := nameMatch[0][1]
+
+	name, err := BuildAssetName(absPath)
+	if err != nil {
+		return nil, err
+	}
 	if !dir.IsRoot {
 		name = filepath.Join(dir.Name, name)
 	}
@@ -39,7 +50,23 @@ func NewAssetFile(path string, manifest *InputManifest, dir *AssetDir) (*AssetFi
 	return asset, err
 }
 
-func (asset *AssetFile) ParseDirectives() error {
+func (asset *AssetFile) EvaluateDirectives() error {
+	if !asset.directivesParsed {
+		if err := asset.parseDirectives(); err != nil {
+			return err
+		}
+	}
+
+	for _, directive := range asset.Directives {
+		if err := directive.Evaluate(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (asset *AssetFile) parseDirectives() error {
 	file, err := os.Open(asset.Path)
 	if err != nil {
 		return err
@@ -68,8 +95,12 @@ func (asset *AssetFile) ParseDirectives() error {
 			break
 		}
 
-		directive, err := NewAssetDirective(string(line))
+		directive, err := NewAssetDirective(asset, string(line))
 		if err != nil {
+			return err
+		}
+
+		if err := directive.Evaluate(); err != nil {
 			return err
 		}
 
@@ -82,6 +113,7 @@ func (asset *AssetFile) ParseDirectives() error {
 
 	asset.Directives = directives
 	asset.dataByteOffset = bytesRead
+	asset.directivesParsed = true
 
 	return nil
 }

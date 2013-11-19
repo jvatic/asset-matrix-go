@@ -31,3 +31,13 @@ func (manifest *InputManifest) ScanInputDirs() error {
 
 	return nil
 }
+
+func (manifest *InputManifest) EvaluateDirectives() error {
+	for _, asset := range manifest.FileNameMapping {
+		if err := asset.EvaluateDirectives(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
