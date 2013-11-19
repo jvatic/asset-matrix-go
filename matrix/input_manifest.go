@@ -10,8 +10,8 @@ type InputManifest struct {
 	FileNameMapping map[string]string
 }
 
-func NewInputManifest(inputDirs []string, outputDir string) (*InputManifest, error) {
-	return &InputManifest{InputDirs: inputDirs, OutputDir: outputDir}, nil
+func NewInputManifest(inputDirs []string, outputDir string) *InputManifest {
+	return &InputManifest{InputDirs: inputDirs, OutputDir: outputDir}
 }
 
 func (manifest *InputManifest) ScanInputDirs() {

@@ -16,7 +16,7 @@ func main() {
 
 	inputPaths := flag.Args()
 
-	inputManifest, _ := matrix.NewInputManifest(inputPaths, *outputDir)
+	inputManifest := matrix.NewInputManifest(inputPaths, *outputDir)
 
 	inputManifest.ScanInputDirs()
 }
