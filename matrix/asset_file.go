@@ -15,14 +15,21 @@ type AssetFile struct {
 }
 
 func NewAssetFile(path string) (*AssetFile, error) {
-	absPath, _ := filepath.Abs(path)
+	absPath, err := filepath.Abs(path)
+
+	if err != nil {
+		return nil, err
+	}
+
 	return &AssetFile{Path: absPath}, nil
 }
 
-var directiveRegexPattern = "\\A\\S+=\\s*(\\S+)\\s*(.*)\\z"
+func (file *AssetFile) ParseDirectives() error {
+	fileDesc, err := os.Open(file.Path)
 
-func (file *AssetFile) ParseDirectives() {
-	fileDesc, _ := os.Open(file.Path)
+	if err != nil {
+		return err
+	}
 
 	var directives []*AssetDirective
 
@@ -58,4 +65,6 @@ func (file *AssetFile) ParseDirectives() {
 	file.Directives = directives
 
 	fmt.Printf("dataByteOffset: %d\n", file.dataByteOffset)
+
+	return nil
 }

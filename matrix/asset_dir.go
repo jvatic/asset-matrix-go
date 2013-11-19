@@ -13,12 +13,22 @@ type AssetDir struct {
 }
 
 func NewAssetDir(path string) (*AssetDir, error) {
-	absPath, _ := filepath.Abs(path)
+	absPath, err := filepath.Abs(path)
+
+	if err != nil {
+		return nil, err
+	}
+
 	return &AssetDir{Path: absPath}, nil
 }
 
 func (dir *AssetDir) scan() error {
-	absPath, _ := filepath.Abs(dir.Path)
+	absPath, err := filepath.Abs(dir.Path)
+
+	if err != nil {
+		return err
+	}
+
 	fmt.Printf("Scan dir: %s...\n", absPath)
 	filepath.Walk(dir.Path, dir.visit)
 
@@ -37,11 +47,15 @@ func (dir *AssetDir) visit(path string, f os.FileInfo, err error) error {
 		return filepath.SkipDir
 	}
 
-	file, _ := NewAssetFile(path)
+	file, err := NewAssetFile(path)
+
+	if err != nil {
+		return err
+	}
 
 	fmt.Printf("File: %s\n", file.Path)
 
-	file.ParseDirectives()
+	err = file.ParseDirectives()
 
-	return nil
+	return err
 }
