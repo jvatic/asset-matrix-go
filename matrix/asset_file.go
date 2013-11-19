@@ -23,10 +23,10 @@ func NewAssetFile(path string) (*AssetFile, error) {
 	return &AssetFile{Path: absPath}, nil
 }
 
-func (file *AssetFile) ParseDirectives() error {
-	fileDesc, err := os.Open(file.Path)
+func (asset *AssetFile) ParseDirectives() error {
+	file, err := os.Open(asset.Path)
 
-	defer fileDesc.Close()
+	defer file.Close()
 
 	if err != nil {
 		return err
@@ -34,7 +34,7 @@ func (file *AssetFile) ParseDirectives() error {
 
 	var directives []*AssetDirective
 
-	scanner := bufio.NewScanner(fileDesc)
+	scanner := bufio.NewScanner(file)
 
 	bytesRead := 0
 	for scanner.Scan() {
@@ -60,10 +60,10 @@ func (file *AssetFile) ParseDirectives() error {
 		fmt.Println(directive.Name, directive.Value)
 	}
 
-	file.dataByteOffset = bytesRead
-	file.Directives = directives
+	asset.dataByteOffset = bytesRead
+	asset.Directives = directives
 
-	fmt.Printf("dataByteOffset: %d\n", file.dataByteOffset)
+	fmt.Printf("dataByteOffset: %d\n", asset.dataByteOffset)
 
 	return nil
 }
