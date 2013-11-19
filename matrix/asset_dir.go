@@ -1,7 +1,6 @@
 package matrix
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 )
@@ -34,12 +33,6 @@ func NewAssetDir(path string, manifest *InputManifest, parent *AssetDir) (*Asset
 }
 
 func (dir *AssetDir) scan() error {
-	absPath, err := filepath.Abs(dir.Path)
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("Scan dir: %s...\n", absPath)
 	return filepath.Walk(dir.Path, dir.visit)
 }
 
@@ -61,12 +54,6 @@ func (dir *AssetDir) visit(path string, f os.FileInfo, err error) error {
 		return filepath.SkipDir
 	}
 
-	file, err := NewAssetFile(path, dir.Manifest, dir)
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("File: %s\n", file.Path)
-
-	return nil
+	_, err = NewAssetFile(path, dir.Manifest, dir)
+	return err
 }
