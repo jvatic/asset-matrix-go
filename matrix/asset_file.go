@@ -57,6 +57,10 @@ func (asset *AssetFile) ParseDirectives() error {
 		fmt.Println(directive.Name, directive.Value)
 	}
 
+	if scanner.Err() != nil {
+		return scanner.Err()
+	}
+
 	asset.dataByteOffset = bytesRead
 	asset.Directives = directives
 
