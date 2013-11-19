@@ -10,14 +10,13 @@ import (
 func main() {
 	fmt.Println("Compiling assets...")
 
-	var outputDir string
-	flag.StringVar(&outputDir, "output", "./output", "path to output directory")
+	outputDir := flag.String("output", "./output", "path to output directory")
 
 	flag.Parse()
 
 	inputPaths := flag.Args()
 
-	inputManifest, _ := matrix.NewInputManifest(inputPaths, outputDir)
+	inputManifest, _ := matrix.NewInputManifest(inputPaths, *outputDir)
 
 	inputManifest.ScanInputDirs()
 }
