@@ -30,9 +30,9 @@ func (dir *AssetDir) scan() error {
 	}
 
 	fmt.Printf("Scan dir: %s...\n", absPath)
-	filepath.Walk(dir.Path, dir.visit)
+	err = filepath.Walk(dir.Path, dir.visit)
 
-	return nil
+	return err
 }
 
 func (dir *AssetDir) visit(path string, f os.FileInfo, err error) error {
