@@ -22,8 +22,7 @@ func (manifest *InputManifest) ScanInputDirs() error {
 			return err
 		}
 
-		err = dir.scan()
-		if err != nil {
+		if err := dir.scan(); err != nil {
 			return err
 		}
 

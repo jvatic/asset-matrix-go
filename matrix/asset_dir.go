@@ -38,8 +38,7 @@ func (dir *AssetDir) visit(path string, f os.FileInfo, err error) error {
 			return err
 		}
 
-		err = subDir.scan()
-		if err != nil {
+		if err := subDir.scan(); err != nil {
 			return err
 		}
 
