@@ -9,6 +9,7 @@ type AssetDir struct {
 	Path     string
 	Name     string
 	Parent   *AssetDir
+	RootDir  *AssetDir
 	IsRoot   bool
 	Assets   []*AssetFile
 	Manifest *InputManifest
@@ -24,7 +25,11 @@ func NewAssetDir(path string, manifest *InputManifest, parent *AssetDir) (*Asset
 
 	dir := &AssetDir{Path: absPath, Name: name, Parent: parent, IsRoot: parent == nil, Manifest: manifest}
 
-	if !dir.IsRoot {
+	if dir.IsRoot {
+		dir.RootDir = dir
+	} else {
+		dir.RootDir = parent.RootDir
+
 		manifest.DirPathMapping[dir.Path] = dir
 		manifest.DirNameMapping[dir.Name] = dir
 	}
