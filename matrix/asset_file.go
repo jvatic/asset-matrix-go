@@ -54,7 +54,7 @@ func (file *AssetFile) ParseDirectives() error {
 			break
 		}
 
-		directive, _ := NewAssetDirective(line)
+		directive := NewAssetDirective(line)
 
 		directives = append(directives, directive)
 
