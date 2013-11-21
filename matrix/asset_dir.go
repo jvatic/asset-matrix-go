@@ -6,48 +6,75 @@ import (
 )
 
 type AssetDir struct {
-	Path     string
-	Name     string
-	Parent   *AssetDir
-	RootDir  *AssetDir
-	IsRoot   bool
-	Assets   []*AssetFile
-	Manifest *InputManifest
+	Assets []*AssetFile
+
+	AssetPointer
+
+	path     string
+	name     string
+	parent   *AssetDir
+	rootDir  *AssetDir
+	isRoot   bool
+	manifest *InputManifest
 }
 
 func NewAssetDir(path string, manifest *InputManifest, parent *AssetDir) (*AssetDir, error) {
 	absPath, err := filepath.Abs(path)
 
 	name := filepath.Base(absPath)
-	if parent != nil && !parent.IsRoot {
-		name = filepath.Join(parent.Name, name)
+	if parent != nil && !parent.IsRoot() {
+		name = filepath.Join(parent.Name(), name)
 	}
 
-	dir := &AssetDir{Path: absPath, Name: name, Parent: parent, IsRoot: parent == nil, Manifest: manifest}
+	dir := &AssetDir{path: absPath, name: name, parent: parent, isRoot: parent == nil, manifest: manifest}
 
-	if dir.IsRoot {
-		dir.RootDir = dir
+	if dir.IsRoot() {
+		dir.rootDir = dir
 	} else {
-		dir.RootDir = parent.RootDir
+		dir.rootDir = parent.RootDir()
 
-		manifest.DirPathMapping[dir.Path] = dir
-		manifest.DirNameMapping[dir.Name] = dir
+		manifest.DirPathMapping[dir.Path()] = dir
+		manifest.DirNameMapping[dir.Name()] = dir
 	}
 
 	return dir, err
 }
 
+func (dir *AssetDir) Path() string {
+	return dir.path
+}
+
+func (dir *AssetDir) Name() string {
+	return dir.name
+}
+
+func (dir *AssetDir) Dir() *AssetDir {
+	return dir.parent
+}
+
+func (dir *AssetDir) RootDir() *AssetDir {
+	return dir.rootDir
+}
+
+func (dir *AssetDir) Manifest() *InputManifest {
+	return dir.manifest
+}
+
+func (dir *AssetDir) IsRoot() bool {
+	return dir.isRoot
+}
+
 func (dir *AssetDir) scan() error {
-	return filepath.Walk(dir.Path, dir.visit)
+	return filepath.Walk(dir.Path(), dir.visit)
 }
 
 func (dir *AssetDir) visit(path string, f os.FileInfo, err error) error {
-	if path == dir.Path {
+	if path == dir.Path() {
 		return nil
 	}
 
 	if f.IsDir() {
-		subDir, err := NewAssetDir(path, dir.Manifest, dir)
+		subDir, err := NewAssetDir(path, dir.Manifest(), dir)
 		if err != nil {
 			return err
 		}
@@ -59,6 +86,6 @@ func (dir *AssetDir) visit(path string, f os.FileInfo, err error) error {
 		return filepath.SkipDir
 	}
 
-	_, err = NewAssetFile(path, dir.Manifest, dir)
+	_, err = NewAssetFile(path, dir)
 	return err
 }

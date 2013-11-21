@@ -9,11 +9,13 @@ import (
 )
 
 type AssetFile struct {
-	Path             string
-	Name             string
-	Directives       []*AssetDirective
-	Dir              *AssetDir
-	Manifest         *InputManifest
+	Directives []*AssetDirective
+
+	AssetPointer
+
+	path             string
+	name             string
+	dir              *AssetDir
 	dataByteOffset   int
 	directivesParsed bool
 }
@@ -28,7 +30,7 @@ func BuildAssetName(path string) (string, error) {
 	return match[0][1], nil
 }
 
-func NewAssetFile(path string, manifest *InputManifest, dir *AssetDir) (*AssetFile, error) {
+func NewAssetFile(path string, dir *AssetDir) (*AssetFile, error) {
 	absPath, err := filepath.Abs(path)
 	if err != nil {
 		return nil, err
@@ -38,16 +40,41 @@ func NewAssetFile(path string, manifest *InputManifest, dir *AssetDir) (*AssetFi
 	if err != nil {
 		return nil, err
 	}
-	if !dir.IsRoot {
-		name = filepath.Join(dir.Name, name)
+	if !dir.IsRoot() {
+		name = filepath.Join(dir.Name(), name)
 	}
 
-	asset := &AssetFile{Path: absPath, Name: name, Manifest: manifest, Dir: dir}
+	asset := &AssetFile{path: absPath, name: name, dir: dir}
 
-	manifest.FilePathMapping[asset.Path] = asset
-	manifest.FileNameMapping[asset.Name] = asset
+	manifest := asset.Manifest()
+	manifest.FilePathMapping[asset.Path()] = asset
+	manifest.FileNameMapping[asset.Name()] = asset
 
 	return asset, err
+}
+
+func (asset *AssetFile) Path() string {
+	return asset.path
+}
+
+func (asset *AssetFile) Name() string {
+	return asset.name
+}
+
+func (asset *AssetFile) Dir() *AssetDir {
+	return asset.dir
+}
+
+func (asset *AssetFile) RootDir() *AssetDir {
+	return asset.dir.RootDir()
+}
+
+func (asset *AssetFile) Manifest() *InputManifest {
+	return asset.dir.Manifest()
+}
+
+func (asset *AssetFile) IsRoot() bool {
+	return false
 }
 
 func (asset *AssetFile) EvaluateDirectives() error {
@@ -67,7 +94,7 @@ func (asset *AssetFile) EvaluateDirectives() error {
 }
 
 func (asset *AssetFile) parseDirectives() error {
-	file, err := os.Open(asset.Path)
+	file, err := os.Open(asset.Path())
 	if err != nil {
 		return err
 	}
