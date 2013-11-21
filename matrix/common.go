@@ -18,7 +18,7 @@ type AssetPointer interface {
 	// The asset root the asset or dir lives in
 	RootDir() *Dir
 	// The manifest used to scan for assets
-	Manifest() *InputManifest
+	Manifest() *Manifest
 	// Is true if it's an asset root
 	IsRoot() bool
 }

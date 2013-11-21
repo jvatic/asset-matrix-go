@@ -5,7 +5,7 @@ type AssetMap struct {
 	Files map[string]*File
 }
 
-type InputManifest struct {
+type Manifest struct {
 	AssetRoots      []*Dir
 	InputDirs       []string
 	OutputDir       string
@@ -14,11 +14,11 @@ type InputManifest struct {
 	NameMapping     map[string]*AssetMap
 }
 
-func NewInputManifest(inputDirs []string, outputDir string) *InputManifest {
-	return &InputManifest{InputDirs: inputDirs, OutputDir: outputDir, DirPathMapping: make(map[string]*Dir), FilePathMapping: make(map[string]*File), NameMapping: make(map[string]*AssetMap)}
+func NewManifest(inputDirs []string, outputDir string) *Manifest {
+	return &Manifest{InputDirs: inputDirs, OutputDir: outputDir, DirPathMapping: make(map[string]*Dir), FilePathMapping: make(map[string]*File), NameMapping: make(map[string]*AssetMap)}
 }
 
-func (manifest *InputManifest) AddDir(dir *Dir) {
+func (manifest *Manifest) AddDir(dir *Dir) {
 	manifest.DirPathMapping[dir.Path()] = dir
 
 	if manifest.NameMapping[dir.Name()] == nil {
@@ -28,7 +28,7 @@ func (manifest *InputManifest) AddDir(dir *Dir) {
 	}
 }
 
-func (manifest *InputManifest) AddFile(asset *File) {
+func (manifest *Manifest) AddFile(asset *File) {
 	manifest.FilePathMapping[asset.Path()] = asset
 
 	if manifest.NameMapping[asset.Name()] == nil {
@@ -40,7 +40,7 @@ func (manifest *InputManifest) AddFile(asset *File) {
 	manifest.NameMapping[asset.Name()].Files[asset.Ext()] = asset
 }
 
-func (manifest *InputManifest) FindDirName(name string) *Dir {
+func (manifest *Manifest) FindDirName(name string) *Dir {
 	assetMap := manifest.NameMapping[name]
 	if assetMap == nil {
 		return nil
@@ -49,7 +49,7 @@ func (manifest *InputManifest) FindDirName(name string) *Dir {
 	return assetMap.Dir
 }
 
-func (manifest *InputManifest) FindFileName(name string, ext string) *File {
+func (manifest *Manifest) FindFileName(name string, ext string) *File {
 	assetMap := manifest.NameMapping[name]
 	if assetMap == nil {
 		return nil
@@ -70,7 +70,7 @@ func (manifest *InputManifest) FindFileName(name string, ext string) *File {
 	}
 }
 
-func (manifest *InputManifest) ScanInputDirs() error {
+func (manifest *Manifest) ScanInputDirs() error {
 	manifest.AssetRoots = make([]*Dir, len(manifest.InputDirs))
 	for i, path := range manifest.InputDirs {
 		dir, err := NewDir(path, manifest, nil)
@@ -88,7 +88,7 @@ func (manifest *InputManifest) ScanInputDirs() error {
 	return nil
 }
 
-func (manifest *InputManifest) EvaluateDirectives() error {
+func (manifest *Manifest) EvaluateDirectives() error {
 	for _, assetMap := range manifest.NameMapping {
 		if assetMap == nil {
 			continue

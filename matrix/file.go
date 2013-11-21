@@ -66,7 +66,7 @@ func (asset *File) RootDir() *Dir {
 	return asset.dir.RootDir()
 }
 
-func (asset *File) Manifest() *InputManifest {
+func (asset *File) Manifest() *Manifest {
 	return asset.dir.Manifest()
 }
 

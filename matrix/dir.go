@@ -15,10 +15,10 @@ type Dir struct {
 	parent   *Dir
 	rootDir  *Dir
 	isRoot   bool
-	manifest *InputManifest
+	manifest *Manifest
 }
 
-func NewDir(path string, manifest *InputManifest, parent *Dir) (*Dir, error) {
+func NewDir(path string, manifest *Manifest, parent *Dir) (*Dir, error) {
 	absPath, err := filepath.Abs(path)
 
 	name := filepath.Base(absPath)
@@ -55,7 +55,7 @@ func (dir *Dir) RootDir() *Dir {
 	return dir.rootDir
 }
 
-func (dir *Dir) Manifest() *InputManifest {
+func (dir *Dir) Manifest() *Manifest {
 	return dir.manifest
 }
 
