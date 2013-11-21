@@ -1,24 +1,24 @@
 package matrix
 
 type AssetMap struct {
-	Dir   *AssetDir
-	Files map[string]*AssetFile
+	Dir   *Dir
+	Files map[string]*File
 }
 
 type InputManifest struct {
-	AssetRoots      []*AssetDir
+	AssetRoots      []*Dir
 	InputDirs       []string
 	OutputDir       string
-	DirPathMapping  map[string]*AssetDir
-	FilePathMapping map[string]*AssetFile
+	DirPathMapping  map[string]*Dir
+	FilePathMapping map[string]*File
 	NameMapping     map[string]*AssetMap
 }
 
 func NewInputManifest(inputDirs []string, outputDir string) *InputManifest {
-	return &InputManifest{InputDirs: inputDirs, OutputDir: outputDir, DirPathMapping: make(map[string]*AssetDir), FilePathMapping: make(map[string]*AssetFile), NameMapping: make(map[string]*AssetMap)}
+	return &InputManifest{InputDirs: inputDirs, OutputDir: outputDir, DirPathMapping: make(map[string]*Dir), FilePathMapping: make(map[string]*File), NameMapping: make(map[string]*AssetMap)}
 }
 
-func (manifest *InputManifest) AddDir(dir *AssetDir) {
+func (manifest *InputManifest) AddDir(dir *Dir) {
 	manifest.DirPathMapping[dir.Path()] = dir
 
 	if manifest.NameMapping[dir.Name()] == nil {
@@ -28,19 +28,19 @@ func (manifest *InputManifest) AddDir(dir *AssetDir) {
 	}
 }
 
-func (manifest *InputManifest) AddFile(asset *AssetFile) {
+func (manifest *InputManifest) AddFile(asset *File) {
 	manifest.FilePathMapping[asset.Path()] = asset
 
 	if manifest.NameMapping[asset.Name()] == nil {
 		manifest.NameMapping[asset.Name()] = &AssetMap{}
 	}
 	if manifest.NameMapping[asset.Name()].Files == nil {
-		manifest.NameMapping[asset.Name()].Files = make(map[string]*AssetFile)
+		manifest.NameMapping[asset.Name()].Files = make(map[string]*File)
 	}
 	manifest.NameMapping[asset.Name()].Files[asset.Ext()] = asset
 }
 
-func (manifest *InputManifest) FindDirName(name string) *AssetDir {
+func (manifest *InputManifest) FindDirName(name string) *Dir {
 	assetMap := manifest.NameMapping[name]
 	if assetMap == nil {
 		return nil
@@ -49,7 +49,7 @@ func (manifest *InputManifest) FindDirName(name string) *AssetDir {
 	return assetMap.Dir
 }
 
-func (manifest *InputManifest) FindFileName(name string, ext string) *AssetFile {
+func (manifest *InputManifest) FindFileName(name string, ext string) *File {
 	assetMap := manifest.NameMapping[name]
 	if assetMap == nil {
 		return nil
@@ -71,9 +71,9 @@ func (manifest *InputManifest) FindFileName(name string, ext string) *AssetFile 
 }
 
 func (manifest *InputManifest) ScanInputDirs() error {
-	manifest.AssetRoots = make([]*AssetDir, len(manifest.InputDirs))
+	manifest.AssetRoots = make([]*Dir, len(manifest.InputDirs))
 	for i, path := range manifest.InputDirs {
-		dir, err := NewAssetDir(path, manifest, nil)
+		dir, err := NewDir(path, manifest, nil)
 		if err != nil {
 			return err
 		}

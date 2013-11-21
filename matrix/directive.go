@@ -5,26 +5,26 @@ import (
 	"path/filepath"
 )
 
-type AssetDirective struct {
-	Asset    *AssetFile
+type Directive struct {
+	Asset    *File
 	String   string
 	Name     string
 	Value    string
-	AssetRef *AssetFile
-	DirRef   *AssetDir
+	AssetRef *File
+	DirRef   *Dir
 }
 
-func NewAssetDirective(asset *AssetFile, str string) (*AssetDirective, error) {
+func NewDirective(asset *File, str string) (*Directive, error) {
 	// parse name and value
 	match := directiveRegex.FindAllStringSubmatch(str, -1)
 	if len(match) < 1 || len(match[0]) < 3 {
 		return nil, fmt.Errorf("matrix: invalid directive string: %s", str)
 	}
 
-	return &AssetDirective{Asset: asset, String: str, Name: match[0][1], Value: match[0][2]}, nil
+	return &Directive{Asset: asset, String: str, Name: match[0][1], Value: match[0][2]}, nil
 }
 
-func (directive *AssetDirective) Evaluate() error {
+func (directive *Directive) Evaluate() error {
 	switch directive.Name {
 	case "require":
 		// TODO Handle URL to file
@@ -55,7 +55,7 @@ func (directive *AssetDirective) Evaluate() error {
 	return nil
 }
 
-func (directive *AssetDirective) evaluateName(path string) string {
+func (directive *Directive) evaluateName(path string) string {
 	if string(path[0]) == "." {
 		if directive.Asset.Dir().IsRoot() {
 			return string(filepath.Join("/", path)[1:])
@@ -67,6 +67,6 @@ func (directive *AssetDirective) evaluateName(path string) string {
 	}
 }
 
-func (directive *AssetDirective) evaluateExt(path string) string {
+func (directive *Directive) evaluateExt(path string) string {
 	return filepath.Ext(path)
 }

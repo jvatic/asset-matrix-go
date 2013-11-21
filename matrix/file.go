@@ -8,14 +8,14 @@ import (
 	"regexp"
 )
 
-type AssetFile struct {
-	Directives []*AssetDirective
+type File struct {
+	Directives []*Directive
 
 	AssetPointer
 
 	path             string
 	name             string
-	dir              *AssetDir
+	dir              *Dir
 	dataByteOffset   int
 	directivesParsed bool
 }
@@ -30,7 +30,7 @@ func BuildAssetName(path string) (string, error) {
 	return match[0][1], nil
 }
 
-func NewAssetFile(path string, dir *AssetDir) (*AssetFile, error) {
+func NewFile(path string, dir *Dir) (*File, error) {
 	absPath, err := filepath.Abs(path)
 	if err != nil {
 		return nil, err
@@ -44,41 +44,41 @@ func NewAssetFile(path string, dir *AssetDir) (*AssetFile, error) {
 		name = filepath.Join(dir.Name(), name)
 	}
 
-	asset := &AssetFile{path: absPath, name: name, dir: dir}
+	asset := &File{path: absPath, name: name, dir: dir}
 	asset.Manifest().AddFile(asset)
 
 	return asset, err
 }
 
-func (asset *AssetFile) Path() string {
+func (asset *File) Path() string {
 	return asset.path
 }
 
-func (asset *AssetFile) Name() string {
+func (asset *File) Name() string {
 	return asset.name
 }
 
-func (asset *AssetFile) Dir() *AssetDir {
+func (asset *File) Dir() *Dir {
 	return asset.dir
 }
 
-func (asset *AssetFile) RootDir() *AssetDir {
+func (asset *File) RootDir() *Dir {
 	return asset.dir.RootDir()
 }
 
-func (asset *AssetFile) Manifest() *InputManifest {
+func (asset *File) Manifest() *InputManifest {
 	return asset.dir.Manifest()
 }
 
-func (asset *AssetFile) IsRoot() bool {
+func (asset *File) IsRoot() bool {
 	return false
 }
 
-func (asset *AssetFile) Ext() string {
+func (asset *File) Ext() string {
 	return filepath.Ext(asset.Path())
 }
 
-func (asset *AssetFile) EvaluateDirectives() error {
+func (asset *File) EvaluateDirectives() error {
 	if !asset.directivesParsed {
 		if err := asset.parseDirectives(); err != nil {
 			return err
@@ -94,7 +94,7 @@ func (asset *AssetFile) EvaluateDirectives() error {
 	return nil
 }
 
-func (asset *AssetFile) parseDirectives() error {
+func (asset *File) parseDirectives() error {
 	file, err := os.Open(asset.Path())
 	if err != nil {
 		return err
@@ -102,7 +102,7 @@ func (asset *AssetFile) parseDirectives() error {
 
 	defer file.Close()
 
-	var directives []*AssetDirective
+	var directives []*Directive
 
 	scanner := bufio.NewScanner(file)
 
@@ -123,7 +123,7 @@ func (asset *AssetFile) parseDirectives() error {
 			break
 		}
 
-		directive, err := NewAssetDirective(asset, string(line))
+		directive, err := NewDirective(asset, string(line))
 		if err != nil {
 			return err
 		}

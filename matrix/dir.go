@@ -5,20 +5,20 @@ import (
 	"path/filepath"
 )
 
-type AssetDir struct {
-	Assets []*AssetFile
+type Dir struct {
+	Assets []*File
 
 	AssetPointer
 
 	path     string
 	name     string
-	parent   *AssetDir
-	rootDir  *AssetDir
+	parent   *Dir
+	rootDir  *Dir
 	isRoot   bool
 	manifest *InputManifest
 }
 
-func NewAssetDir(path string, manifest *InputManifest, parent *AssetDir) (*AssetDir, error) {
+func NewDir(path string, manifest *InputManifest, parent *Dir) (*Dir, error) {
 	absPath, err := filepath.Abs(path)
 
 	name := filepath.Base(absPath)
@@ -26,7 +26,7 @@ func NewAssetDir(path string, manifest *InputManifest, parent *AssetDir) (*Asset
 		name = filepath.Join(parent.Name(), name)
 	}
 
-	dir := &AssetDir{path: absPath, name: name, parent: parent, isRoot: parent == nil, manifest: manifest}
+	dir := &Dir{path: absPath, name: name, parent: parent, isRoot: parent == nil, manifest: manifest}
 
 	if dir.IsRoot() {
 		dir.rootDir = dir
@@ -39,41 +39,41 @@ func NewAssetDir(path string, manifest *InputManifest, parent *AssetDir) (*Asset
 	return dir, err
 }
 
-func (dir *AssetDir) Path() string {
+func (dir *Dir) Path() string {
 	return dir.path
 }
 
-func (dir *AssetDir) Name() string {
+func (dir *Dir) Name() string {
 	return dir.name
 }
 
-func (dir *AssetDir) Dir() *AssetDir {
+func (dir *Dir) Dir() *Dir {
 	return dir.parent
 }
 
-func (dir *AssetDir) RootDir() *AssetDir {
+func (dir *Dir) RootDir() *Dir {
 	return dir.rootDir
 }
 
-func (dir *AssetDir) Manifest() *InputManifest {
+func (dir *Dir) Manifest() *InputManifest {
 	return dir.manifest
 }
 
-func (dir *AssetDir) IsRoot() bool {
+func (dir *Dir) IsRoot() bool {
 	return dir.isRoot
 }
 
-func (dir *AssetDir) scan() error {
+func (dir *Dir) scan() error {
 	return filepath.Walk(dir.Path(), dir.visit)
 }
 
-func (dir *AssetDir) visit(path string, f os.FileInfo, err error) error {
+func (dir *Dir) visit(path string, f os.FileInfo, err error) error {
 	if path == dir.Path() {
 		return nil
 	}
 
 	if f.IsDir() {
-		subDir, err := NewAssetDir(path, dir.Manifest(), dir)
+		subDir, err := NewDir(path, dir.Manifest(), dir)
 		if err != nil {
 			return err
 		}
@@ -85,6 +85,6 @@ func (dir *AssetDir) visit(path string, f os.FileInfo, err error) error {
 		return filepath.SkipDir
 	}
 
-	_, err = NewAssetFile(path, dir)
+	_, err = NewFile(path, dir)
 	return err
 }
