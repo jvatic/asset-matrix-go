@@ -33,7 +33,7 @@ func (directive *AssetDirective) Evaluate() error {
 		asset := directive.Asset.Manifest().FindFileName(name, ext)
 
 		if asset == nil {
-			return fmt.Errorf("matrix: require: file not found: %s", name)
+			return fmt.Errorf("matrix: require: file not found: %s — %s", name, directive.Asset.Path())
 		}
 
 		directive.AssetRef = asset
@@ -49,7 +49,7 @@ func (directive *AssetDirective) Evaluate() error {
 
 		directive.DirRef = dir
 	default:
-		return fmt.Errorf("matrix: unknown directive \"%s\"", directive.Name)
+		return fmt.Errorf("matrix: unknown directive \"%s\" — %s", directive.Name, directive.Asset.Path())
 	}
 
 	return nil
