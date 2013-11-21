@@ -45,10 +45,7 @@ func NewAssetFile(path string, dir *AssetDir) (*AssetFile, error) {
 	}
 
 	asset := &AssetFile{path: absPath, name: name, dir: dir}
-
-	manifest := asset.Manifest()
-	manifest.FilePathMapping[asset.Path()] = asset
-	manifest.FileNameMapping[asset.Name()] = asset
+	asset.Manifest().AddFile(asset)
 
 	return asset, err
 }
@@ -75,6 +72,10 @@ func (asset *AssetFile) Manifest() *InputManifest {
 
 func (asset *AssetFile) IsRoot() bool {
 	return false
+}
+
+func (asset *AssetFile) Ext() string {
+	return filepath.Ext(asset.Path())
 }
 
 func (asset *AssetFile) EvaluateDirectives() error {

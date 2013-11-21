@@ -29,7 +29,8 @@ func (directive *AssetDirective) Evaluate() error {
 	case "require":
 		// TODO Handle URL to file
 		name := directive.evaluateName(directive.Value)
-		asset := directive.Asset.Manifest().FileNameMapping[name]
+		ext := directive.evaluateExt(directive.Value)
+		asset := directive.Asset.Manifest().FindFileName(name, ext)
 
 		if asset == nil {
 			return fmt.Errorf("matrix: require: file not found: %s", name)
@@ -41,7 +42,7 @@ func (directive *AssetDirective) Evaluate() error {
 	case "require_tree":
 		name := directive.evaluateName(directive.Value)
 
-		dir := directive.Asset.Manifest().DirNameMapping[name]
+		dir := directive.Asset.Manifest().FindDirName(name)
 		if dir == nil {
 			return fmt.Errorf("matrix: require_tree: dir not found: %s", name)
 		}
@@ -64,4 +65,8 @@ func (directive *AssetDirective) evaluateName(path string) string {
 	} else {
 		return path
 	}
+}
+
+func (directive *AssetDirective) evaluateExt(path string) string {
+	return filepath.Ext(path)
 }

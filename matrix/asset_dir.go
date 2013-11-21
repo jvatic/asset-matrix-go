@@ -33,8 +33,7 @@ func NewAssetDir(path string, manifest *InputManifest, parent *AssetDir) (*Asset
 	} else {
 		dir.rootDir = parent.RootDir()
 
-		manifest.DirPathMapping[dir.Path()] = dir
-		manifest.DirNameMapping[dir.Name()] = dir
+		manifest.AddDir(dir)
 	}
 
 	return dir, err
