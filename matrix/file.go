@@ -95,16 +95,16 @@ func (file *File) EvaluateDirectives() error {
 }
 
 func (file *File) parseDirectives() error {
-	file, err := os.Open(file.Path())
+	fileRef, err := os.Open(file.Path())
 	if err != nil {
 		return err
 	}
 
-	defer file.Close()
+	defer fileRef.Close()
 
 	var directives []*Directive
 
-	scanner := bufio.NewScanner(file)
+	scanner := bufio.NewScanner(fileRef)
 
 	bytesRead := 0
 	for scanner.Scan() {
