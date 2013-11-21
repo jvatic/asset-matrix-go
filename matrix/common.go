@@ -9,15 +9,15 @@ var emptyLineRegex = regexp.MustCompile("\\A\\s*\\z")
 
 // Used by File and Dir types
 type AssetPointer interface {
-	// Abs path of asset or dir
+	// Abs path of file or dir
 	Path() string
-	// Relative path from the asset root excluding the file extension(s)
+	// Relative path from the file root excluding the file extension(s)
 	Name() string
-	// The directory the asset or dir lives in
+	// The directory the file or dir lives in
 	Dir() *Dir
-	// The asset root the asset or dir lives in
+	// The asset root the file or dir lives in
 	RootDir() *Dir
-	// The manifest used to scan for assets
+	// The manifest used to scan for files
 	Manifest() *Manifest
 	// Is true if it's an asset root
 	IsRoot() bool

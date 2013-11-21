@@ -28,16 +28,16 @@ func (manifest *Manifest) AddDir(dir *Dir) {
 	}
 }
 
-func (manifest *Manifest) AddFile(asset *File) {
-	manifest.FilePathMapping[asset.Path()] = asset
+func (manifest *Manifest) AddFile(file *File) {
+	manifest.FilePathMapping[file.Path()] = file
 
-	if manifest.NameMapping[asset.Name()] == nil {
-		manifest.NameMapping[asset.Name()] = &AssetMap{}
+	if manifest.NameMapping[file.Name()] == nil {
+		manifest.NameMapping[file.Name()] = &AssetMap{}
 	}
-	if manifest.NameMapping[asset.Name()].Files == nil {
-		manifest.NameMapping[asset.Name()].Files = make(map[string]*File)
+	if manifest.NameMapping[file.Name()].Files == nil {
+		manifest.NameMapping[file.Name()].Files = make(map[string]*File)
 	}
-	manifest.NameMapping[asset.Name()].Files[asset.Ext()] = asset
+	manifest.NameMapping[file.Name()].Files[file.Ext()] = file
 }
 
 func (manifest *Manifest) FindDirName(name string) *Dir {
@@ -63,8 +63,8 @@ func (manifest *Manifest) FindFileName(name string, ext string) *File {
 	if ext != "" {
 		return files[ext]
 	} else {
-		for _, asset := range files {
-			return asset
+		for _, file := range files {
+			return file
 		}
 		return nil
 	}
@@ -97,8 +97,8 @@ func (manifest *Manifest) EvaluateDirectives() error {
 			continue
 		}
 
-		for _, asset := range assetMap.Files {
-			if err := asset.EvaluateDirectives(); err != nil {
+		for _, file := range assetMap.Files {
+			if err := file.EvaluateDirectives(); err != nil {
 				return err
 			}
 		}

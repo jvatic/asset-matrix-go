@@ -44,48 +44,48 @@ func NewFile(path string, dir *Dir) (*File, error) {
 		name = filepath.Join(dir.Name(), name)
 	}
 
-	asset := &File{path: absPath, name: name, dir: dir}
-	asset.Manifest().AddFile(asset)
+	file := &File{path: absPath, name: name, dir: dir}
+	file.Manifest().AddFile(file)
 
-	return asset, err
+	return file, err
 }
 
-func (asset *File) Path() string {
-	return asset.path
+func (file *File) Path() string {
+	return file.path
 }
 
-func (asset *File) Name() string {
-	return asset.name
+func (file *File) Name() string {
+	return file.name
 }
 
-func (asset *File) Dir() *Dir {
-	return asset.dir
+func (file *File) Dir() *Dir {
+	return file.dir
 }
 
-func (asset *File) RootDir() *Dir {
-	return asset.dir.RootDir()
+func (file *File) RootDir() *Dir {
+	return file.dir.RootDir()
 }
 
-func (asset *File) Manifest() *Manifest {
-	return asset.dir.Manifest()
+func (file *File) Manifest() *Manifest {
+	return file.dir.Manifest()
 }
 
-func (asset *File) IsRoot() bool {
+func (file *File) IsRoot() bool {
 	return false
 }
 
-func (asset *File) Ext() string {
-	return filepath.Ext(asset.Path())
+func (file *File) Ext() string {
+	return filepath.Ext(file.Path())
 }
 
-func (asset *File) EvaluateDirectives() error {
-	if !asset.directivesParsed {
-		if err := asset.parseDirectives(); err != nil {
+func (file *File) EvaluateDirectives() error {
+	if !file.directivesParsed {
+		if err := file.parseDirectives(); err != nil {
 			return err
 		}
 	}
 
-	for _, directive := range asset.Directives {
+	for _, directive := range file.Directives {
 		if err := directive.Evaluate(); err != nil {
 			return err
 		}
@@ -94,8 +94,8 @@ func (asset *File) EvaluateDirectives() error {
 	return nil
 }
 
-func (asset *File) parseDirectives() error {
-	file, err := os.Open(asset.Path())
+func (file *File) parseDirectives() error {
+	file, err := os.Open(file.Path())
 	if err != nil {
 		return err
 	}
@@ -123,7 +123,7 @@ func (asset *File) parseDirectives() error {
 			break
 		}
 
-		directive, err := NewDirective(asset, string(line))
+		directive, err := NewDirective(file, string(line))
 		if err != nil {
 			return err
 		}
@@ -139,9 +139,9 @@ func (asset *File) parseDirectives() error {
 		return scanner.Err()
 	}
 
-	asset.Directives = directives
-	asset.dataByteOffset = bytesRead
-	asset.directivesParsed = true
+	file.Directives = directives
+	file.dataByteOffset = bytesRead
+	file.directivesParsed = true
 
 	return nil
 }
