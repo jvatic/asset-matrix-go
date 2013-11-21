@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/tent/asset-matrix-go/matrix"
+	"github.com/jvatic/asset-matrix-go/matrix"
 )
 
 func main() {
