@@ -9,7 +9,8 @@ import (
 )
 
 type File struct {
-	Directives []*Directive
+	Directives   []*Directive
+	HandlerChain *HandlerChain
 
 	AssetPointer
 
@@ -75,7 +76,7 @@ func (file *File) IsRoot() bool {
 }
 
 func (file *File) Ext() string {
-	return filepath.Ext(file.Path())
+	return filepath.Ext(file.Path())[1:]
 }
 
 func (file *File) EvaluateDirectives() error {

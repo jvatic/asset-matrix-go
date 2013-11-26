@@ -22,4 +22,7 @@ func main() {
 	if err := inputManifest.EvaluateDirectives(); err != nil {
 		fmt.Printf("Error: %s\n", err.Error())
 	}
+
+	inputManifest.AddHandler(matrix.NewCoffeeScriptHandler)
+	inputManifest.ConfigureHandlers()
 }

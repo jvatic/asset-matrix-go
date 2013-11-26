@@ -24,6 +24,20 @@ func NewDirective(file *File, str string) (*Directive, error) {
 	return &Directive{File: file, String: str, Name: match[0][1], Value: match[0][2]}, nil
 }
 
+func (directive *Directive) Files() []*File {
+	files := make([]*File, 0)
+
+	if directive.FileRef != nil {
+		files = append(files, directive.FileRef)
+	} else if directive.DirRef != nil {
+		for _, file := range dirFiles(directive.DirRef) {
+			files = append(files, file)
+		}
+	}
+
+	return files
+}
+
 func (directive *Directive) Evaluate() error {
 	switch directive.Name {
 	case "require":
@@ -69,4 +83,20 @@ func (directive *Directive) evaluateName(path string) string {
 
 func (directive *Directive) evaluateExt(path string) string {
 	return filepath.Ext(path)
+}
+
+func dirFiles(dir *Dir) []*File {
+	files := make([]*File, 0)
+
+	for _, file := range dir.Files {
+		files = append(files, file)
+	}
+
+	for _, dir := range dir.Dirs {
+		for _, file := range dirFiles(dir) {
+			files = append(files, file)
+		}
+	}
+
+	return files
 }

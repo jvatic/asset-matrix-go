@@ -6,7 +6,8 @@ import (
 )
 
 type Dir struct {
-	Assets []*File
+	Files []*File
+	Dirs  []*Dir
 
 	AssetPointer
 
@@ -26,7 +27,7 @@ func NewDir(path string, manifest *Manifest, parent *Dir) (*Dir, error) {
 		name = filepath.Join(parent.Name(), name)
 	}
 
-	dir := &Dir{path: absPath, name: name, parent: parent, isRoot: parent == nil, manifest: manifest}
+	dir := &Dir{path: absPath, name: name, parent: parent, isRoot: parent == nil, manifest: manifest, Files: make([]*File, 0), Dirs: make([]*Dir, 0)}
 
 	if dir.IsRoot() {
 		dir.rootDir = dir
@@ -63,6 +64,14 @@ func (dir *Dir) IsRoot() bool {
 	return dir.isRoot
 }
 
+func (dir *Dir) AddFile(file *File) {
+	dir.Files = append(dir.Files, file)
+}
+
+func (dir *Dir) AddSubDir(subDir *Dir) {
+	dir.Dirs = append(dir.Dirs, subDir)
+}
+
 func (dir *Dir) scan() error {
 	return filepath.Walk(dir.Path(), dir.visit)
 }
@@ -78,6 +87,8 @@ func (dir *Dir) visit(path string, f os.FileInfo, err error) error {
 			return err
 		}
 
+		dir.AddSubDir(subDir)
+
 		if err := subDir.scan(); err != nil {
 			return err
 		}
@@ -85,6 +96,9 @@ func (dir *Dir) visit(path string, f os.FileInfo, err error) error {
 		return filepath.SkipDir
 	}
 
-	_, err = NewFile(path, dir)
+	file, err := NewFile(path, dir)
+	if err != nil {
+		dir.AddFile(file)
+	}
 	return err
 }
