@@ -56,5 +56,6 @@ func (chain *HandlerChain) addHandler(ext string, input io.Reader, output io.Wri
 	}
 
 	handler, _ := NewDefaultHandler(ext, input, output)
+	chain.Handlers = append(chain.Handlers, handler)
 	return handler
 }
