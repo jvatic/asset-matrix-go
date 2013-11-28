@@ -18,9 +18,9 @@ func NewCoffeeScriptHandler(file *File) (Handler, bool) {
 	return handler, true
 }
 
-func (handler *CoffeeScriptHandler) FileExts() []*FileExt {
-	exts := make([]*FileExt, 0)
-	return append(exts, &FileExt{Input: "coffee", Output: "js", OutputMode: OM_Replace})
+func (handler *CoffeeScriptHandler) HandlerInputOutputs() []*HandlerInputOutput {
+	exts := make([]*HandlerInputOutput, 0)
+	return append(exts, &HandlerInputOutput{Input: "coffee", Output: "js", OutputMode: OM_Replace})
 }
 
 func (handler *CoffeeScriptHandler) InputFile() *File {
@@ -28,7 +28,7 @@ func (handler *CoffeeScriptHandler) InputFile() *File {
 }
 
 func (handler *CoffeeScriptHandler) canHandleFile(file *File) bool {
-	exts := handler.FileExts()
+	exts := handler.HandlerInputOutputs()
 	fileExt := file.Ext()
 	for _, ext := range exts {
 		if fileExt == ext.Input {

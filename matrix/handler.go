@@ -12,7 +12,7 @@ const (
 // handler is nil when canHandle is false
 type HandlerConstructor func(*File) (handler Handler, canHandle bool)
 
-type FileExt struct {
+type HandlerInputOutput struct {
 	// May be set to "*" to catch all or a string such as "js" to match all files with the "js" file extention
 	// Is set to an empty string if the output does not directly correlate to an input
 	Input string
@@ -27,7 +27,7 @@ type FileExt struct {
 
 type Handler interface {
 	// File extensions supported for input/output
-	FileExts() []*FileExt
+	HandlerInputOutputs() []*HandlerInputOutput
 	GenerateOutput(*File) []*File
 	InputFile() *File
 }
