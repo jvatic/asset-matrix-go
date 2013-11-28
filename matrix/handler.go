@@ -1,5 +1,9 @@
 package matrix
 
+import (
+	"io"
+)
+
 type outputmode int
 
 const (
@@ -8,9 +12,6 @@ const (
 	OM_Append  outputmode = 2 // append to input extension
 	OM_Discard outputmode = 3 // there is no output
 )
-
-// handler is nil when canHandle is false
-type HandlerConstructor func(*File) (handler Handler, canHandle bool)
 
 type HandlerInputOutput struct {
 	// May be set to "*" to catch all or a string such as "js" to match all files with the "js" file extention
@@ -28,6 +29,9 @@ type HandlerInputOutput struct {
 type Handler interface {
 	// File extensions supported for input/output
 	HandlerInputOutputs() []*HandlerInputOutput
-	GenerateOutput(*File) []*File
-	InputFile() *File
+	InputReader() io.Reader
+	SetInputCloser(io.Closer)
+	IsDefaultHandler() bool
 }
+
+type HandlerConstructor func(inputExt string, inputReader io.Reader, outputWriter io.Writer) (handler Handler, canHandle bool)

@@ -1,21 +1,31 @@
 package matrix
 
+import (
+	"io"
+)
+
 type DefaultHandler struct {
 	Handler
 
-	file *File
+	inputExt     string
+	inputReader  io.Reader
+	inputCloser  io.Closer
+	outputWriter io.Writer
 }
 
-func NewDefaultHandler(file *File) (Handler, bool) {
-	return &DefaultHandler{file: file}, true
+func NewDefaultHandler(inputExt string, inputReader io.Reader, outputWriter io.Writer) (Handler, bool) {
+	return &DefaultHandler{inputExt: inputExt, inputReader: inputReader, outputWriter: outputWriter}, true
 }
 
 func (handler *DefaultHandler) HandlerInputOutputs() []*HandlerInputOutput {
-	ext := handler.file.Ext()
 	exts := make([]*HandlerInputOutput, 0)
-	return append(exts, &HandlerInputOutput{Input: ext, Output: ext, OutputMode: OM_Replace})
+	return append(exts, &HandlerInputOutput{Input: handler.inputExt, Output: handler.inputExt, OutputMode: OM_Replace})
 }
 
-func (handler *DefaultHandler) InputFile() *File {
-	return handler.file
+func (handler *DefaultHandler) SetInputCloser(inputCloser io.Closer) {
+	handler.inputCloser = inputCloser
+}
+
+func (handler *DefaultHandler) IsDefaultHandler() bool {
+	return true
 }

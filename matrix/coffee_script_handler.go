@@ -1,21 +1,21 @@
 package matrix
 
+import (
+	"io"
+)
+
 type CoffeeScriptHandler struct {
 	Handler
 
-	file *File
+	inputExt     string
+	inputReader  io.Reader
+	inputCloser  io.Closer
+	outputWriter io.Writer
 }
 
-func NewCoffeeScriptHandler(file *File) (Handler, bool) {
-	handler := new(CoffeeScriptHandler)
-
-	if !handler.canHandleFile(file) {
-		return nil, false
-	}
-
-	handler.file = file
-
-	return handler, true
+func NewCoffeeScriptHandler(inputExt string, inputReader io.Reader, outputWriter io.Writer) (Handler, bool) {
+	handler := &CoffeeScriptHandler{inputExt: inputExt, inputReader: inputReader, outputWriter: outputWriter}
+	return handler, handler.canHandleInput()
 }
 
 func (handler *CoffeeScriptHandler) HandlerInputOutputs() []*HandlerInputOutput {
@@ -23,17 +23,19 @@ func (handler *CoffeeScriptHandler) HandlerInputOutputs() []*HandlerInputOutput 
 	return append(exts, &HandlerInputOutput{Input: "coffee", Output: "js", OutputMode: OM_Replace})
 }
 
-func (handler *CoffeeScriptHandler) InputFile() *File {
-	return handler.file
-}
-
-func (handler *CoffeeScriptHandler) canHandleFile(file *File) bool {
-	exts := handler.HandlerInputOutputs()
-	fileExt := file.Ext()
-	for _, ext := range exts {
-		if fileExt == ext.Input {
+func (handler *CoffeeScriptHandler) canHandleInput() bool {
+	for _, inOut := range handler.HandlerInputOutputs() {
+		if inOut.Input == handler.inputExt {
 			return true
 		}
 	}
+	return false
+}
+
+func (handler *CoffeeScriptHandler) SetInputCloser(inputCloser io.Closer) {
+	handler.inputCloser = inputCloser
+}
+
+func (handler *CoffeeScriptHandler) IsDefaultHandler() bool {
 	return false
 }

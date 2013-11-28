@@ -9,8 +9,8 @@ import (
 )
 
 type File struct {
-	Directives   []*Directive
-	HandlerChain *HandlerChain
+	Directives  []*Directive
+	FileHandler *FileHandler
 
 	AssetPointer
 

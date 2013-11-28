@@ -24,5 +24,7 @@ func main() {
 	}
 
 	inputManifest.AddHandler(matrix.NewCoffeeScriptHandler)
-	inputManifest.ConfigureHandlers()
+	if err := inputManifest.ConfigureHandlers(); err != nil {
+		fmt.Printf("Error: %s\n", err.Error())
+	}
 }

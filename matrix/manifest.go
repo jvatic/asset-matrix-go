@@ -112,12 +112,13 @@ func (manifest *Manifest) EvaluateDirectives() error {
 	return nil
 }
 
-func (manifest *Manifest) ConfigureHandlers() {
+func (manifest *Manifest) ConfigureHandlers() error {
 	for _, file := range manifest.FilePathMapping {
-		file.HandlerChain = NewHandlerChain(file, manifest.Handlers)
+		fileHandler, err := NewFileHandler(file, manifest.Handlers)
+		if err != nil {
+			return err
+		}
+		file.FileHandler = fileHandler
 	}
-
-	for _, file := range manifest.FilePathMapping {
-		file.HandlerChain.Evaluate()
-	}
+	return nil
 }
