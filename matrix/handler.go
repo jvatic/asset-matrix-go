@@ -4,13 +4,13 @@ import (
 	"io"
 )
 
-type outputmode int
+type OutputMode int
 
 const (
-	OM_Replace outputmode = 0 // replace input extension
-	OM_Prepend outputmode = 1 // prepend to input extension
-	OM_Append  outputmode = 2 // append to input extension
-	OM_Discard outputmode = 3 // there is no output
+	OutputModeReplace OutputMode = iota // replace input extension
+	OutputModePrepend OutputMode = iota // prepend to input extension
+	OutputModeAppend  OutputMode = iota // append to input extension
+	OutputModeDiscard OutputMode = iota // there is no output
 )
 
 type HandlerInputOutput struct {
@@ -23,7 +23,7 @@ type HandlerInputOutput struct {
 	// Is set to an empty string if the input does not directly correlate to an output
 	Output string
 	// Specifies how the output suffix should be placed relative to the input suffix and if there is an output
-	OutputMode outputmode
+	OutputMode OutputMode
 }
 
 type Handler interface {

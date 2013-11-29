@@ -20,7 +20,7 @@ func NewCoffeeScriptHandler(inputExt string, inputReader io.Reader, outputWriter
 
 func (handler *CoffeeScriptHandler) HandlerInputOutputs() []*HandlerInputOutput {
 	exts := make([]*HandlerInputOutput, 0)
-	return append(exts, &HandlerInputOutput{Input: "coffee", Output: "js", OutputMode: OM_Replace})
+	return append(exts, &HandlerInputOutput{Input: "coffee", Output: "js", OutputMode: OutputModeReplace})
 }
 
 func (handler *CoffeeScriptHandler) canHandleInput() bool {

@@ -19,7 +19,7 @@ func NewDefaultHandler(inputExt string, inputReader io.Reader, outputWriter io.W
 
 func (handler *DefaultHandler) HandlerInputOutputs() []*HandlerInputOutput {
 	exts := make([]*HandlerInputOutput, 0)
-	return append(exts, &HandlerInputOutput{Input: handler.inputExt, Output: handler.inputExt, OutputMode: OM_Replace})
+	return append(exts, &HandlerInputOutput{Input: handler.inputExt, Output: handler.inputExt, OutputMode: OutputModeReplace})
 }
 
 func (handler *DefaultHandler) SetInputCloser(inputCloser io.Closer) {
