@@ -6,9 +6,9 @@ type FileHandler struct {
 	ParentHandlers []*FileHandler
 }
 
-func NewFileHandler(file *File, handlerConstructors []HandlerConstructor) (*FileHandler, error) {
+func NewFileHandler(file *File) (*FileHandler, error) {
 	fileHandler := new(FileHandler)
-	chain, err := NewHandlerChain(file, handlerConstructors)
+	chain, err := NewHandlerChain(file)
 	fileHandler.HandlerChain = chain
 	return fileHandler, err
 }

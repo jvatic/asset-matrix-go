@@ -4,34 +4,40 @@ import (
 	"io"
 )
 
+type InputMode int
+
+const (
+	InputModeFlow InputMode = iota // output replaces input in the current file stream (e.g. coffee -> js)
+	InputModeFork InputMode = iota // forks input into a new file stream (e.g. js -> [js, js.gz])
+)
+
 type OutputMode int
 
 const (
-	OutputModeReplace OutputMode = iota // replace input extension
-	OutputModePrepend OutputMode = iota // prepend to input extension
-	OutputModeAppend  OutputMode = iota // append to input extension
-	OutputModeDiscard OutputMode = iota // there is no output
+	OutputModeFlow  OutputMode = iota // single output for each input (e.g. coffee -> js)
+	OutputModeUnite OutputMode = iota // single output for the collection of all inputs (e.g. * -> manifest.json)
 )
 
-type HandlerInputOutput struct {
-	// May be set to "*" to catch all or a string such as "js" to match all files with the "js" file extention
-	// Is set to an empty string if the output does not directly correlate to an input
-	Input string
-	// Is true if handler takes all matching inputs at once
-	InputMulti bool
-	// May be set to a string such as "js"
-	// Is set to an empty string if the input does not directly correlate to an output
-	Output string
-	// Specifies how the output suffix should be placed relative to the input suffix and if there is an output
+type Handler interface {
+	Handle(in io.Reader, out io.Writer, inputName string, inputExts []string) (name string, exts []string, err error)
+}
+
+type HandlerOptions struct {
+	InputMode  InputMode
 	OutputMode OutputMode
 }
 
-type Handler interface {
-	// File extensions supported for input/output
-	HandlerInputOutputs() []*HandlerInputOutput
-	InputReader() io.Reader
-	SetInputCloser(io.Closer)
-	IsDefaultHandler() bool
+type RegisteredHandler struct {
+	Handler Handler
+	Options *HandlerOptions
 }
 
-type HandlerConstructor func(inputExt string, inputReader io.Reader, outputWriter io.Writer) (handler Handler, canHandle bool)
+// map[input ext]map[output ext]{handler, options}
+var registeredHandlers map[string]map[string]*RegisteredHandler = make(map[string]map[string]*RegisteredHandler)
+
+func Register(inExt string, outExt string, handler Handler, options *HandlerOptions) {
+	if registeredHandlers[inExt] == nil {
+		registeredHandlers[inExt] = make(map[string]*RegisteredHandler)
+	}
+	registeredHandlers[inExt][outExt] = &RegisteredHandler{handler, options}
+}

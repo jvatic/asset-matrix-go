@@ -4,38 +4,15 @@ import (
 	"io"
 )
 
-type CoffeeScriptHandler struct {
+type CoffeeHandler struct {
 	Handler
-
-	inputExt     string
-	inputReader  io.Reader
-	inputCloser  io.Closer
-	outputWriter io.Writer
 }
 
-func NewCoffeeScriptHandler(inputExt string, inputReader io.Reader, outputWriter io.Writer) (Handler, bool) {
-	handler := &CoffeeScriptHandler{inputExt: inputExt, inputReader: inputReader, outputWriter: outputWriter}
-	return handler, handler.canHandleInput()
+func init() {
+	Register("coffee", "js", new(CoffeeHandler), &HandlerOptions{InputMode: InputModeFlow, OutputMode: OutputModeFlow})
 }
 
-func (handler *CoffeeScriptHandler) HandlerInputOutputs() []*HandlerInputOutput {
-	exts := make([]*HandlerInputOutput, 0)
-	return append(exts, &HandlerInputOutput{Input: "coffee", Output: "js", OutputMode: OutputModeReplace})
-}
-
-func (handler *CoffeeScriptHandler) canHandleInput() bool {
-	for _, inOut := range handler.HandlerInputOutputs() {
-		if inOut.Input == handler.inputExt {
-			return true
-		}
-	}
-	return false
-}
-
-func (handler *CoffeeScriptHandler) SetInputCloser(inputCloser io.Closer) {
-	handler.inputCloser = inputCloser
-}
-
-func (handler *CoffeeScriptHandler) IsDefaultHandler() bool {
-	return false
+func (handler *CoffeeHandler) Handle(in io.Reader, out io.Writer, inputName string, inputExts []string) (name string, exts []string, err error) {
+	// TODO: in -> exec coffee -> out
+	return inputName, append(exts, "coffee"), nil
 }

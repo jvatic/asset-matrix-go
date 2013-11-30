@@ -12,11 +12,10 @@ type Manifest struct {
 	DirPathMapping  map[string]*Dir
 	FilePathMapping map[string]*File
 	NameMapping     map[string]*AssetMap
-	Handlers        []HandlerConstructor
 }
 
 func NewManifest(inputDirs []string, outputDir string) *Manifest {
-	return &Manifest{InputDirs: inputDirs, OutputDir: outputDir, DirPathMapping: make(map[string]*Dir), FilePathMapping: make(map[string]*File), NameMapping: make(map[string]*AssetMap), Handlers: make([]HandlerConstructor, 0)}
+	return &Manifest{InputDirs: inputDirs, OutputDir: outputDir, DirPathMapping: make(map[string]*Dir), FilePathMapping: make(map[string]*File), NameMapping: make(map[string]*AssetMap)}
 }
 
 func (manifest *Manifest) AddDir(dir *Dir) {
@@ -39,10 +38,6 @@ func (manifest *Manifest) AddFile(file *File) {
 		manifest.NameMapping[file.Name()].Files = make(map[string]*File)
 	}
 	manifest.NameMapping[file.Name()].Files[file.Ext()] = file
-}
-
-func (manifest *Manifest) AddHandler(fn HandlerConstructor) {
-	manifest.Handlers = append(manifest.Handlers, fn)
 }
 
 func (manifest *Manifest) FindDirName(name string) *Dir {
@@ -114,7 +109,7 @@ func (manifest *Manifest) EvaluateDirectives() error {
 
 func (manifest *Manifest) ConfigureHandlers() error {
 	for _, file := range manifest.FilePathMapping {
-		fileHandler, err := NewFileHandler(file, manifest.Handlers)
+		fileHandler, err := NewFileHandler(file)
 		if err != nil {
 			return err
 		}

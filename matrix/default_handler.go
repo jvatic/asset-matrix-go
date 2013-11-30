@@ -6,26 +6,9 @@ import (
 
 type DefaultHandler struct {
 	Handler
-
-	inputExt     string
-	inputReader  io.Reader
-	inputCloser  io.Closer
-	outputWriter io.Writer
 }
 
-func NewDefaultHandler(inputExt string, inputReader io.Reader, outputWriter io.Writer) (Handler, bool) {
-	return &DefaultHandler{inputExt: inputExt, inputReader: inputReader, outputWriter: outputWriter}, true
-}
-
-func (handler *DefaultHandler) HandlerInputOutputs() []*HandlerInputOutput {
-	exts := make([]*HandlerInputOutput, 0)
-	return append(exts, &HandlerInputOutput{Input: handler.inputExt, Output: handler.inputExt, OutputMode: OutputModeReplace})
-}
-
-func (handler *DefaultHandler) SetInputCloser(inputCloser io.Closer) {
-	handler.inputCloser = inputCloser
-}
-
-func (handler *DefaultHandler) IsDefaultHandler() bool {
-	return true
+func (handler *DefaultHandler) Handle(in io.Reader, out io.Writer, inputName string, inputExts []string) (name string, exts []string, err error) {
+	// TODO: copy(in, out)
+	return inputName, inputExts, nil
 }
