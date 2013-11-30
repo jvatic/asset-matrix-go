@@ -12,10 +12,11 @@ type Manifest struct {
 	DirPathMapping  map[string]*Dir
 	FilePathMapping map[string]*File
 	NameMapping     map[string]*AssetMap
+	FileHandlers    map[string]*FileHandler
 }
 
 func NewManifest(inputDirs []string, outputDir string) *Manifest {
-	return &Manifest{InputDirs: inputDirs, OutputDir: outputDir, DirPathMapping: make(map[string]*Dir), FilePathMapping: make(map[string]*File), NameMapping: make(map[string]*AssetMap)}
+	return &Manifest{InputDirs: inputDirs, OutputDir: outputDir, DirPathMapping: make(map[string]*Dir), FilePathMapping: make(map[string]*File), NameMapping: make(map[string]*AssetMap), FileHandlers: make(map[string]*FileHandler)}
 }
 
 func (manifest *Manifest) AddDir(dir *Dir) {
@@ -113,7 +114,7 @@ func (manifest *Manifest) ConfigureHandlers() error {
 		if err != nil {
 			return err
 		}
-		file.FileHandler = fileHandler
+		manifest.FileHandlers[file.Path()] = fileHandler
 	}
 	return nil
 }
