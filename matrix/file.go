@@ -80,6 +80,19 @@ func (file *File) Ext() string {
 }
 
 func (file *File) EvaluateDirectives() error {
+	// only parse directives on compatible files
+	fileExt := file.Ext()
+	directiveCompatible := false
+	for _, ext := range DirectiveExts {
+		if ext == fileExt {
+			directiveCompatible = true
+		}
+	}
+	if !directiveCompatible {
+		file.Directives = make([]*Directive, 0)
+		return nil
+	}
+
 	if !file.directivesParsed {
 		if err := file.parseDirectives(); err != nil {
 			return err
