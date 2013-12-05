@@ -1,5 +1,7 @@
 package matrix
 
+import "fmt"
+
 type AssetMap struct {
 	Dir   *Dir
 	Files map[string]*File
@@ -110,10 +112,7 @@ func (manifest *Manifest) EvaluateDirectives() error {
 
 func (manifest *Manifest) ConfigureHandlers() error {
 	for _, file := range manifest.FilePathMapping {
-		fileHandler, err := NewFileHandler(file)
-		if err != nil {
-			return err
-		}
+		fileHandler := NewFileHandler(file.Ext())
 		manifest.FileHandlers[file.Path()] = fileHandler
 	}
 	return nil

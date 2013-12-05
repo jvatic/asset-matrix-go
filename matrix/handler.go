@@ -41,3 +41,12 @@ func Register(inExt string, outExt string, handler Handler, options *HandlerOpti
 	}
 	registeredHandlers[inExt][outExt] = &RegisteredHandler{handler, options}
 }
+
+func FindHandlers(inExt string) (handlers map[string]*RegisteredHandler) {
+	handlers = registeredHandlers[inExt]
+	if handlers != nil {
+		return handlers
+	}
+
+	return registeredHandlers["*"]
+}
