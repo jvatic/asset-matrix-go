@@ -1,6 +1,7 @@
 package matrix
 
 import (
+	"fmt"
 	"io"
 )
 
@@ -23,4 +24,8 @@ func (handler *ForkHandler) Handle(in io.Reader, out io.Writer, inputName string
 
 func (handler *ForkHandler) OutputExt() string {
 	return handler.ext
+}
+
+func (handler *ForkHandler) String() string {
+	return fmt.Sprintf("ForkHandler(%s)", handler.OutputExt())
 }

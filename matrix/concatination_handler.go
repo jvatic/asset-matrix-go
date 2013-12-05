@@ -1,6 +1,7 @@
 package matrix
 
 import (
+	"fmt"
 	"io"
 )
 
@@ -37,4 +38,8 @@ func (handler *ConcatinationHandler) Handle(in io.Reader, out io.Writer, inputNa
 
 func (handler *ConcatinationHandler) OutputExt() string {
 	return handler.ext
+}
+
+func (handler *ConcatinationHandler) String() string {
+	return fmt.Sprintf("ConcatinationHandler(%v)", handler.child.HandlerChain)
 }

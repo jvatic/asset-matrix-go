@@ -1,6 +1,7 @@
 package matrix
 
 import (
+	"fmt"
 	"io"
 )
 
@@ -21,4 +22,8 @@ func (handler *DefaultHandler) Handle(in io.Reader, out io.Writer, inputName str
 
 func (handler *DefaultHandler) OutputExt() string {
 	return handler.ext
+}
+
+func (handler *DefaultHandler) String() string {
+	return fmt.Sprintf("DefaultHandler(%s)", handler.OutputExt())
 }

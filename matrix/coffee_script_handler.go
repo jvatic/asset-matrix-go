@@ -20,3 +20,7 @@ func (handler *CoffeeHandler) Handle(in io.Reader, out io.Writer, inputName stri
 func (handler *CoffeeHandler) OutputExt() string {
 	return "js"
 }
+
+func (handler *CoffeeHandler) String() string {
+	return "CoffeeHandler"
+}
