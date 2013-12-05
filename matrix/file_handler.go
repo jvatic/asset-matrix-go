@@ -7,7 +7,7 @@ type FileHandler struct {
 }
 
 func NewFileHandler(inExt string) *FileHandler {
-	fileHandler := &FileHandler{HandlerChain: make([]Handler, 0)}
+	fileHandler := new(FileHandler)
 	fileHandler.buildHandlerChain(inExt)
 	return fileHandler
 }
@@ -30,4 +30,15 @@ func (fileHandler *FileHandler) buildHandlerChain(inExt string) {
 			fileHandler.HandlerChain = append(fileHandler.HandlerChain, fh)
 		}
 	}
+}
+
+func (fileHandler *FileHandler) AddFileHandler(fh *FileHandler) {
+	if fh != fileHandler {
+		fh.AddParentFileHandler(fileHandler)
+	}
+	fileHandler.FileSet = append(fileHandler.FileSet, fh)
+}
+
+func (fileHandler *FileHandler) AddParentFileHandler(fh *FileHandler) {
+	fileHandler.ParentHandlers = append(fileHandler.ParentHandlers, fh)
 }

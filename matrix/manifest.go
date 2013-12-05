@@ -1,7 +1,5 @@
 package matrix
 
-import "fmt"
-
 type AssetMap struct {
 	Dir   *Dir
 	Files map[string]*File
@@ -111,9 +109,30 @@ func (manifest *Manifest) EvaluateDirectives() error {
 }
 
 func (manifest *Manifest) ConfigureHandlers() error {
+	// Build initial handler chains
 	for _, file := range manifest.FilePathMapping {
 		fileHandler := NewFileHandler(file.Ext())
+		file.FileHandler = fileHandler
 		manifest.FileHandlers[file.Path()] = fileHandler
 	}
+
+	// Build lists of parent/child file handlers
+	for _, file := range manifest.FilePathMapping {
+		selfAdded := false
+		for _, directive := range file.Directives {
+			for _, f := range directive.Files() {
+				fileHandler := f.FileHandler
+				if fileHandler == file.FileHandler {
+					selfAdded = true
+				}
+				file.FileHandler.AddFileHandler(fileHandler)
+			}
+		}
+
+		if !selfAdded {
+			file.FileHandler.AddFileHandler(file.FileHandler)
+		}
+	}
+
 	return nil
 }
