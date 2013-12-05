@@ -1,5 +1,9 @@
 package matrix
 
+import (
+	"sort"
+)
+
 type AssetMap struct {
 	Dir   *Dir
 	Files map[string]*File
@@ -109,9 +113,11 @@ func (manifest *Manifest) EvaluateDirectives() error {
 
 func (manifest *Manifest) ConfigureHandlers() error {
 	// Build initial handler chains
+	fileHandlers := make([]*FileHandler, 0)
 	for _, file := range manifest.FilePathMapping {
 		fileHandler := NewFileHandler(file.Ext())
 		file.FileHandler = fileHandler
+		fileHandlers = append(fileHandlers, fileHandler)
 	}
 
 	// Build lists of parent/child file handlers
@@ -129,6 +135,16 @@ func (manifest *Manifest) ConfigureHandlers() error {
 
 		if !selfAdded {
 			file.FileHandler.AddFileHandler(file.FileHandler)
+		}
+	}
+
+	// Sort file handlers by len(fh.ParentHandlers) (most to least)
+	sort.Sort(ByLenParentHandlersReversed(fileHandlers))
+
+	// Insert concatination handlers
+	for _, fh := range fileHandlers {
+		if err := fh.MergeWithParents(); err != nil {
+			return err
 		}
 	}
 

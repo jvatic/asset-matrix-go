@@ -22,3 +22,21 @@ type AssetPointer interface {
 	// Is true if it's an asset root
 	IsRoot() bool
 }
+
+// ByLenParentHandlerChain sort.Interface
+type ByLenHandlerChain []*FileHandler
+
+func (a ByLenHandlerChain) Len() int      { return len(a) }
+func (a ByLenHandlerChain) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a ByLenHandlerChain) Less(i, j int) bool {
+	return len(a[i].HandlerChain) < len(a[j].HandlerChain)
+}
+
+// ByLenParentHandlersReversed implements sort.Interface
+type ByLenParentHandlersReversed []*FileHandler
+
+func (a ByLenParentHandlersReversed) Len() int      { return len(a) }
+func (a ByLenParentHandlersReversed) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a ByLenParentHandlersReversed) Less(i, j int) bool {
+	return len(a[j].ParentHandlers) < len(a[i].ParentHandlers)
+}

@@ -17,10 +17,11 @@ type ConcatinationHandler struct {
 	parent *FileHandler
 	child  *FileHandler
 	mode   ConcatinationMode
+	ext    string
 }
 
-func NewConcatinationHandler(parent *FileHandler, child *FileHandler, mode ConcatinationMode) (handler *ConcatinationHandler) {
-	return &ConcatinationHandler{parent: parent, child: child, mode: mode}
+func NewConcatinationHandler(parent *FileHandler, child *FileHandler, mode ConcatinationMode, ext string) (handler *ConcatinationHandler) {
+	return &ConcatinationHandler{parent: parent, child: child, mode: mode, ext: ext}
 }
 
 func (handler *ConcatinationHandler) Handle(in io.Reader, out io.Writer, inputName string, inputExts []string) (name string, exts []string, err error) {
@@ -32,4 +33,8 @@ func (handler *ConcatinationHandler) Handle(in io.Reader, out io.Writer, inputNa
 	}
 
 	return inputName, inputExts, nil
+}
+
+func (handler *ConcatinationHandler) OutputExt() string {
+	return handler.ext
 }

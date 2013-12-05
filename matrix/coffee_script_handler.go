@@ -16,3 +16,7 @@ func (handler *CoffeeHandler) Handle(in io.Reader, out io.Writer, inputName stri
 	// TODO: in -> exec coffee -> out
 	return inputName, append(exts, "coffee"), nil
 }
+
+func (handler *CoffeeHandler) OutputExt() string {
+	return "js"
+}
