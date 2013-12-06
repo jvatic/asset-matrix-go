@@ -72,7 +72,7 @@ func (dir *Dir) AddSubDir(subDir *Dir) {
 	dir.Dirs = append(dir.Dirs, subDir)
 }
 
-func (dir *Dir) scan() error {
+func (dir *Dir) Scan() error {
 	return filepath.Walk(dir.Path(), dir.visit)
 }
 
@@ -89,7 +89,7 @@ func (dir *Dir) visit(path string, f os.FileInfo, err error) error {
 
 		dir.AddSubDir(subDir)
 
-		if err := subDir.scan(); err != nil {
+		if err := subDir.Scan(); err != nil {
 			return err
 		}
 

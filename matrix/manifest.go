@@ -82,7 +82,7 @@ func (manifest *Manifest) ScanInputDirs() error {
 			return err
 		}
 
-		if err := dir.scan(); err != nil {
+		if err := dir.Scan(); err != nil {
 			return err
 		}
 
