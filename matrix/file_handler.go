@@ -9,6 +9,7 @@ type FileHandler struct {
 	HandlerChain   []Handler
 	FileSet        []*FileHandler
 	ParentHandlers []*FileHandler
+	File           *File
 }
 
 func NewFileHandler(inExt string) *FileHandler {

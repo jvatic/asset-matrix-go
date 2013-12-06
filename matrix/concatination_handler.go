@@ -41,5 +41,9 @@ func (handler *ConcatinationHandler) OutputExt() string {
 }
 
 func (handler *ConcatinationHandler) String() string {
-	return fmt.Sprintf("ConcatinationHandler(%v)", handler.child.HandlerChain)
+	var name string
+	if handler.child.File != nil {
+		name = handler.child.File.Name()
+	}
+	return fmt.Sprintf("ConcatinationHandler(%s — %v)", name, handler.child.HandlerChain)
 }

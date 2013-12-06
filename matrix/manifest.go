@@ -116,6 +116,7 @@ func (manifest *Manifest) ConfigureHandlers() error {
 	fileHandlers := make([]*FileHandler, 0)
 	for _, file := range manifest.FilePathMapping {
 		fileHandler := NewFileHandler(file.Ext())
+		fileHandler.File = file
 		file.FileHandler = fileHandler
 		fileHandlers = append(fileHandlers, fileHandler)
 	}
