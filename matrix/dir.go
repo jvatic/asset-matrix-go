@@ -97,7 +97,7 @@ func (dir *Dir) visit(path string, f os.FileInfo, err error) error {
 	}
 
 	file, err := NewFile(path, dir)
-	if err != nil {
+	if err == nil {
 		dir.AddFile(file)
 	}
 	return err
