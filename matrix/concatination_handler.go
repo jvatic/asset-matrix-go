@@ -1,6 +1,7 @@
 package matrix
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 )
@@ -26,11 +27,17 @@ func NewConcatinationHandler(parent *FileHandler, child *FileHandler, mode Conca
 }
 
 func (handler *ConcatinationHandler) Handle(in io.Reader, out io.Writer, inputName string, inputExts []string) (name string, exts []string, err error) {
+	var childOutBytes []byte
+	childBuf := bytes.NewBuffer(childOutBytes)
+	handler.child.Handle(in, childBuf, inputName, inputExts)
+
 	switch handler.mode {
 	case ConcatinationModePrepend:
-		// TODO: write(out, handle(child) + in)
+		io.Copy(out, childBuf)
+		io.Copy(out, in)
 	case ConcatinationModeAppend:
-		// TODO: write(out, in + handle(child))
+		io.Copy(out, in)
+		io.Copy(out, childBuf)
 	}
 
 	return inputName, inputExts, nil

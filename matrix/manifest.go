@@ -1,7 +1,12 @@
 package matrix
 
 import (
+	"bytes"
+	"io"
+	"os"
+	"path/filepath"
 	"sort"
+	"strings"
 )
 
 type AssetMap struct {
@@ -16,6 +21,7 @@ type Manifest struct {
 	DirPathMapping  map[string]*Dir
 	FilePathMapping map[string]*File
 	NameMapping     map[string]*AssetMap
+	fileHandlers    []*FileHandler
 }
 
 func NewManifest(inputDirs []string, outputDir string) *Manifest {
@@ -113,12 +119,12 @@ func (manifest *Manifest) EvaluateDirectives() error {
 
 func (manifest *Manifest) ConfigureHandlers() error {
 	// Build initial handler chains
-	fileHandlers := make([]*FileHandler, 0)
+	manifest.fileHandlers = make([]*FileHandler, 0)
 	for _, file := range manifest.FilePathMapping {
 		fileHandler := NewFileHandler(file.Ext())
 		fileHandler.File = file
 		file.FileHandler = fileHandler
-		fileHandlers = append(fileHandlers, fileHandler)
+		manifest.fileHandlers = append(manifest.fileHandlers, fileHandler)
 	}
 
 	// Build lists of parent/child file handlers
@@ -140,14 +146,71 @@ func (manifest *Manifest) ConfigureHandlers() error {
 	}
 
 	// Sort file handlers by len(fh.ParentHandlers) (most to least)
-	sort.Sort(ByLenParentHandlersReversed(fileHandlers))
+	sort.Sort(ByLenParentHandlersReversed(manifest.fileHandlers))
 
 	// Insert concatination handlers
-	for _, fh := range fileHandlers {
+	for _, fh := range manifest.fileHandlers {
 		if err := fh.MergeWithParents(); err != nil {
 			return err
 		}
 	}
 
+	return nil
+}
+
+func (manifest *Manifest) outFilePath(name string, exts []string) (string, error) {
+	path, err := filepath.Abs(filepath.Join(manifest.OutputDir, name))
+	if err != nil {
+		return "", err
+	}
+	parts := []string{path}
+	for _, ext := range exts {
+		parts = append(parts, ext)
+	}
+	return strings.Join(parts, "."), nil
+}
+
+func (manifest *Manifest) WriteOutput() error {
+	// Loop through fileHandlers in reverse order (least to most ParentHandlers)
+	for i := len(manifest.fileHandlers); i > 0; i-- {
+		fh := manifest.fileHandlers[i-1]
+
+		/*
+			if len(fh.ParentHandlers) > 0 {
+				continue
+			}
+		*/
+
+		f, err := os.Open(fh.File.Path())
+		if err != nil {
+			return err
+		}
+
+		var outBytes []byte
+		out := bytes.NewBuffer(outBytes)
+		name, exts, err := fh.Handle(f, out, fh.File.Name(), fh.File.Exts())
+		if closeErr := f.Close(); closeErr != nil {
+			return closeErr
+		}
+		if err != nil {
+			return err
+		}
+
+		outPath, err := manifest.outFilePath(name, exts)
+		if err != nil {
+			return err
+		}
+		if err := os.MkdirAll(filepath.Dir(outPath), os.ModePerm); err != nil {
+			return err
+		}
+		outFile, err := os.Create(outPath)
+		if err != nil {
+			return err
+		}
+		_, err = io.Copy(outFile, out)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }

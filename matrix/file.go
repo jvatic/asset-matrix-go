@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 )
 
 type File struct {
@@ -77,6 +78,10 @@ func (file *File) IsRoot() bool {
 
 func (file *File) Ext() string {
 	return filepath.Ext(file.Path())[1:]
+}
+
+func (file *File) Exts() []string {
+	return strings.Split(filepath.Base(file.Path()), ".")[1:]
 }
 
 func (file *File) EvaluateDirectives() error {

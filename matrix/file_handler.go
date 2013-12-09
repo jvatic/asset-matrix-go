@@ -1,7 +1,9 @@
 package matrix
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"sort"
 )
 
@@ -105,4 +107,26 @@ func removeIncompatibleHandlers(a []Handler, b []Handler) (int, error) {
 	}
 
 	return 0, fmt.Errorf("matrix: FileHandler: incompatible handler chains: %v, %v", a, b)
+}
+
+func (fileHandler *FileHandler) Handle(in io.Reader, out io.Writer, name string, exts []string) (string, []string, error) {
+	var (
+		err     error
+		inData  []byte
+		outData []byte
+	)
+	inDataBuf := bytes.NewBuffer(inData)
+	outDataBuf := bytes.NewBuffer(outData)
+	io.Copy(inDataBuf, in)
+	for _, handler := range fileHandler.HandlerChain {
+		name, exts, err = handler.Handle(inDataBuf, outDataBuf, name, exts)
+		if err != nil {
+			return name, exts, err
+		}
+		inDataBuf.Reset()
+		io.Copy(inDataBuf, outDataBuf)
+		outDataBuf.Reset()
+	}
+	io.Copy(out, inDataBuf)
+	return name, exts, err
 }

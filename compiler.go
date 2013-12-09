@@ -26,4 +26,8 @@ func main() {
 	if err := inputManifest.ConfigureHandlers(); err != nil {
 		fmt.Printf("Error: %s\n", err.Error())
 	}
+
+	if err := inputManifest.WriteOutput(); err != nil {
+		fmt.Printf("Error: %s\n", err.Error())
+	}
 }
