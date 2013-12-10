@@ -152,7 +152,7 @@ func (manifest *Manifest) ConfigureHandlers() error {
 	// Sort file handlers by len(fh.ParentHandlers) (most to least)
 	sort.Sort(byLenParentHandlersReversed(manifest.fileHandlers))
 
-	// Insert concatination handlers
+	// Insert concatenation handlers
 	for _, fh := range manifest.fileHandlers {
 		if err := fh.MergeWithParents(); err != nil {
 			return err

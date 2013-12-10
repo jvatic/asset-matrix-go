@@ -89,7 +89,7 @@ func (fileHandler *FileHandler) MergeWithParents() error {
 			return err
 		}
 
-		// add concatination handler to parent
+		// add concatenation handler to parent
 		parent.concatinateAtIndex(fileHandler, index)
 	}
 
