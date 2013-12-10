@@ -81,7 +81,7 @@ func (parent *FileHandler) concatinateAtIndex(child *FileHandler, handlerIndex i
 
 func (fileHandler *FileHandler) MergeWithParents() error {
 	// sort parent handlers by lowest len(fh.HandlerChain)
-	sort.Sort(ByLenHandlerChain(fileHandler.ParentHandlers))
+	sort.Sort(byLenHandlerChain(fileHandler.ParentHandlers))
 	for _, parent := range fileHandler.ParentHandlers {
 		// ensure the last handler in each chain have the same out ext
 		index, err := removeIncompatibleHandlers(fileHandler.HandlerChain, parent.HandlerChain)

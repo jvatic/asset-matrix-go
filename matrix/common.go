@@ -23,20 +23,20 @@ type AssetPointer interface {
 	IsRoot() bool
 }
 
-// ByLenParentHandlerChain sort.Interface
-type ByLenHandlerChain []*FileHandler
+// byLenParentHandlerChain sort.Interface
+type byLenHandlerChain []*FileHandler
 
-func (a ByLenHandlerChain) Len() int      { return len(a) }
-func (a ByLenHandlerChain) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
-func (a ByLenHandlerChain) Less(i, j int) bool {
+func (a byLenHandlerChain) Len() int      { return len(a) }
+func (a byLenHandlerChain) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a byLenHandlerChain) Less(i, j int) bool {
 	return len(a[i].HandlerChain) < len(a[j].HandlerChain)
 }
 
-// ByLenParentHandlersReversed implements sort.Interface
-type ByLenParentHandlersReversed []*FileHandler
+// byLenParentHandlersReversed implements sort.Interface
+type byLenParentHandlersReversed []*FileHandler
 
-func (a ByLenParentHandlersReversed) Len() int      { return len(a) }
-func (a ByLenParentHandlersReversed) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
-func (a ByLenParentHandlersReversed) Less(i, j int) bool {
+func (a byLenParentHandlersReversed) Len() int      { return len(a) }
+func (a byLenParentHandlersReversed) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a byLenParentHandlersReversed) Less(i, j int) bool {
 	return len(a[j].ParentHandlers) < len(a[i].ParentHandlers)
 }

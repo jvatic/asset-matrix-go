@@ -146,7 +146,7 @@ func (manifest *Manifest) ConfigureHandlers() error {
 	}
 
 	// Sort file handlers by len(fh.ParentHandlers) (most to least)
-	sort.Sort(ByLenParentHandlersReversed(manifest.fileHandlers))
+	sort.Sort(byLenParentHandlersReversed(manifest.fileHandlers))
 
 	// Insert concatination handlers
 	for _, fh := range manifest.fileHandlers {
