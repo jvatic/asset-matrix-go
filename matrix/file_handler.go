@@ -110,12 +110,8 @@ func removeIncompatibleHandlers(a []Handler, b []Handler) (int, error) {
 }
 
 func (fileHandler *FileHandler) Handle(in io.Reader, out io.Writer, inName string, inExts []string) (name string, exts []string, err error) {
-	var (
-		inData  []byte
-		outData []byte
-	)
-	inDataBuf := bytes.NewBuffer(inData)
-	outDataBuf := bytes.NewBuffer(outData)
+	inDataBuf := new(bytes.Buffer)
+	outDataBuf := new(bytes.Buffer)
 	name, exts = inName, inExts
 	_, err = io.Copy(inDataBuf, in)
 	if err != nil {
