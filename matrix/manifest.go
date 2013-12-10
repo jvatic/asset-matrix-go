@@ -3,6 +3,7 @@ package matrix
 import (
 	"bytes"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"sort"
@@ -22,10 +23,13 @@ type Manifest struct {
 	FilePathMapping map[string]*File
 	NameMapping     map[string]*AssetMap
 	fileHandlers    []*FileHandler
+	log             *log.Logger
 }
 
-func NewManifest(inputDirs []string, outputDir string) *Manifest {
-	return &Manifest{InputDirs: inputDirs, OutputDir: outputDir, DirPathMapping: make(map[string]*Dir), FilePathMapping: make(map[string]*File), NameMapping: make(map[string]*AssetMap)}
+func NewManifest(inputDirs []string, outputDir string, logOut io.Writer) *Manifest {
+	manifest := &Manifest{InputDirs: inputDirs, OutputDir: outputDir, DirPathMapping: make(map[string]*Dir), FilePathMapping: make(map[string]*File), NameMapping: make(map[string]*AssetMap)}
+	manifest.log = log.New(logOut, "matrix: ", 0)
+	return manifest
 }
 
 func (manifest *Manifest) AddDir(dir *Dir) {
@@ -176,6 +180,8 @@ func (manifest *Manifest) WriteOutput() error {
 		if len(fh.ParentHandlers) > 0 {
 			continue
 		}
+
+		manifest.log.Printf("Processing %s\n", fh.File.Name())
 
 		f, err := os.Open(fh.File.Path())
 		if err != nil {

@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
 
 	"github.com/jvatic/asset-matrix-go/matrix"
 )
@@ -14,7 +15,7 @@ func main() {
 	flag.Parse()
 	inputPaths := flag.Args()
 
-	inputManifest := matrix.NewManifest(inputPaths, *outputDir)
+	inputManifest := matrix.NewManifest(inputPaths, *outputDir, os.Stdout)
 	if err := inputManifest.ScanInputDirs(); err != nil {
 		fmt.Printf("Error: %s\n", err.Error())
 	}
