@@ -26,33 +26,35 @@ func NewConcatenationHandler(parent *FileHandler, child *FileHandler, mode Conca
 	return &ConcatenationHandler{parent: parent, child: child, mode: mode, ext: ext}
 }
 
-func (handler *ConcatenationHandler) Handle(in io.Reader, out io.Writer, inputName string, inputExts []string) (name string, exts []string, err error) {
+func (handler *ConcatenationHandler) Handle(in io.Reader, out io.Writer, inName string, inExts []string) (name string, exts []string, err error) {
+	name, exts = inName, inExts
+
 	var childOutBytes []byte
 	childBuf := bytes.NewBuffer(childOutBytes)
-	handler.child.Handle(in, childBuf, inputName, inputExts)
+	handler.child.Handle(in, childBuf, inName, inExts)
 
 	switch handler.mode {
 	case ConcatenationModePrepend:
 		_, err = io.Copy(out, childBuf)
 		if err != nil {
-			return inputName, inputExts, err
+			return
 		}
 		_, err = io.Copy(out, in)
 		if err != nil {
-			return inputName, inputExts, err
+			return
 		}
 	case ConcatenationModeAppend:
 		_, err = io.Copy(out, in)
 		if err != nil {
-			return inputName, inputExts, err
+			return
 		}
 		_, err = io.Copy(out, childBuf)
 		if err != nil {
-			return inputName, inputExts, err
+			return
 		}
 	}
 
-	return inputName, inputExts, nil
+	return
 }
 
 func (handler *ConcatenationHandler) OutputExt() string {

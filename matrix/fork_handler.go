@@ -16,10 +16,10 @@ func NewForkHandler(fileHandler *FileHandler, ext string) (handler *ForkHandler)
 	return &ForkHandler{fileHandler: fileHandler, ext: ext}
 }
 
-func (handler *ForkHandler) Handle(in io.Reader, out io.Writer, inputName string, inputExts []string) (name string, exts []string, err error) {
+func (handler *ForkHandler) Handle(in io.Reader, out io.Writer, name string, exts []string) (string, []string, error) {
 	// TODO: feed copy of input stream into fileHandler's handler chain
 
-	return inputName, inputExts, nil
+	return name, exts, nil
 }
 
 func (handler *ForkHandler) OutputExt() string {

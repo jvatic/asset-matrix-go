@@ -109,30 +109,30 @@ func removeIncompatibleHandlers(a []Handler, b []Handler) (int, error) {
 	return 0, fmt.Errorf("matrix: FileHandler: incompatible handler chains: %v, %v", a, b)
 }
 
-func (fileHandler *FileHandler) Handle(in io.Reader, out io.Writer, name string, exts []string) (string, []string, error) {
+func (fileHandler *FileHandler) Handle(in io.Reader, out io.Writer, inName string, inExts []string) (name string, exts []string, err error) {
 	var (
-		err     error
 		inData  []byte
 		outData []byte
 	)
 	inDataBuf := bytes.NewBuffer(inData)
 	outDataBuf := bytes.NewBuffer(outData)
+	name, exts = inName, inExts
 	_, err = io.Copy(inDataBuf, in)
 	if err != nil {
-		return name, exts, err
+		return
 	}
 	for _, handler := range fileHandler.HandlerChain {
 		name, exts, err = handler.Handle(inDataBuf, outDataBuf, name, exts)
 		if err != nil {
-			return name, exts, err
+			return
 		}
 		inDataBuf.Reset()
 		_, err = io.Copy(inDataBuf, outDataBuf)
 		if err != nil {
-			return name, exts, err
+			return
 		}
 		outDataBuf.Reset()
 	}
 	_, err = io.Copy(out, inDataBuf)
-	return name, exts, err
+	return
 }

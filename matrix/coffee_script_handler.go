@@ -15,22 +15,22 @@ func init() {
 	Register("coffee", "js", new(CoffeeHandler), &HandlerOptions{InputMode: InputModeFlow, OutputMode: OutputModeFlow})
 }
 
-func (handler *CoffeeHandler) Handle(in io.Reader, out io.Writer, inputName string, inputExts []string) (name string, exts []string, err error) {
+func (handler *CoffeeHandler) Handle(in io.Reader, out io.Writer, inName string, inExts []string) (name string, exts []string, err error) {
 	cmd := exec.Command("coffee", "--compile", "--stdio")
 
 	cmdIn, err := cmd.StdinPipe()
 	if err != nil {
-		return inputName, inputExts, err
+		return inName, inExts, err
 	}
 
 	cmdOut, err := cmd.StdoutPipe()
 	if err != nil {
-		return inputName, inputExts, err
+		return inName, inExts, err
 	}
 
 	cmdErr, err := cmd.StderrPipe()
 	if err != nil {
-		return inputName, inputExts, err
+		return inName, inExts, err
 	}
 
 	errChan := make(chan error, 2)
@@ -60,27 +60,27 @@ func (handler *CoffeeHandler) Handle(in io.Reader, out io.Writer, inputName stri
 	}()
 
 	if err := cmd.Run(); err != nil {
-		return inputName, inputExts, err
+		return inName, inExts, err
 	}
 
 	if errBuf.Len() > 0 {
-		return inputName, inputExts, fmt.Errorf("%v", errBuf)
+		return inName, inExts, fmt.Errorf("%v", errBuf)
 	}
 
 	select {
 	case err := <-errChan:
-		return inputName, inputExts, err
+		return inName, inExts, err
 	default:
 	}
 
-	for _, inExt := range inputExts {
+	for _, inExt := range inExts {
 		if inExt != "coffee" && inExt != "js" {
 			exts = append(exts, inExt)
 		}
 	}
 	exts = append(exts, "js")
 
-	return inputName, exts, nil
+	return inName, exts, nil
 }
 
 func (handler *CoffeeHandler) OutputExt() string {
