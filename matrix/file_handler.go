@@ -63,20 +63,20 @@ func (fileHandler *FileHandler) AddParentFileHandler(fh *FileHandler) {
 }
 
 func (parent *FileHandler) concatinateAtIndex(child *FileHandler, handlerIndex int) {
-	mode := ConcatinationModePrepend
+	mode := ConcatenationModePrepend
 	for _, fh := range parent.FileSet {
 		if fh == child {
 			break
 		}
 
 		if fh == parent {
-			mode = ConcatinationModeAppend
+			mode = ConcatenationModeAppend
 			break
 		}
 	}
 
 	ext := parent.HandlerChain[handlerIndex].OutputExt()
-	parent.addHandlerAfterIndex(NewConcatinationHandler(parent, child, mode, ext), handlerIndex)
+	parent.addHandlerAfterIndex(NewConcatenationHandler(parent, child, mode, ext), handlerIndex)
 }
 
 func (fileHandler *FileHandler) MergeWithParents() error {
