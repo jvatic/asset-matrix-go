@@ -27,7 +27,7 @@ func NewDir(path string, manifest *Manifest, parent *Dir) (*Dir, error) {
 		name = filepath.Join(parent.Name(), name)
 	}
 
-	dir := &Dir{path: absPath, name: name, parent: parent, isRoot: parent == nil, manifest: manifest, Files: make([]*File, 0), Dirs: make([]*Dir, 0)}
+	dir := &Dir{path: absPath, name: name, parent: parent, isRoot: parent == nil, manifest: manifest}
 
 	if dir.IsRoot() {
 		dir.rootDir = dir
