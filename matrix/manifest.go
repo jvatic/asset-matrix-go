@@ -183,16 +183,8 @@ func (manifest *Manifest) WriteOutput() error {
 
 		manifest.log.Printf("Processing %s\n", fh.File.Name())
 
-		f, err := os.Open(fh.File.Path())
-		if err != nil {
-			return err
-		}
-
 		out := new(bytes.Buffer)
-		name, exts, err := fh.Handle(f, out, fh.File.Name(), fh.File.Exts())
-		if closeErr := f.Close(); closeErr != nil {
-			return closeErr
-		}
+		name, exts, err := fh.Handle(out, fh.File.Name(), fh.File.Exts())
 		if err != nil {
 			return err
 		}

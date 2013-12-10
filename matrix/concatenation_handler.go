@@ -3,7 +3,6 @@ package matrix
 import (
 	"fmt"
 	"io"
-	"os"
 )
 
 type ConcatenationMode int
@@ -30,13 +29,7 @@ func (handler *ConcatenationHandler) Handle(in io.Reader, out io.Writer, inName 
 	name, exts = inName, inExts
 
 	handleChild := func() error {
-		f, err := os.Open(handler.child.File.Path())
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-
-		_, _, err = handler.child.Handle(f, out, inName, inExts)
+		_, _, err = handler.child.Handle(out, inName, inExts)
 		return err
 	}
 

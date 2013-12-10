@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"os"
 	"sort"
 )
 
@@ -109,11 +110,17 @@ func removeIncompatibleHandlers(a []Handler, b []Handler) (int, error) {
 	return 0, fmt.Errorf("matrix: FileHandler: incompatible handler chains: %v, %v", a, b)
 }
 
-func (fileHandler *FileHandler) Handle(in io.Reader, out io.Writer, inName string, inExts []string) (name string, exts []string, err error) {
+func (fileHandler *FileHandler) Handle(out io.Writer, inName string, inExts []string) (name string, exts []string, err error) {
+	f, err := os.Open(fileHandler.File.Path())
+	if err != nil {
+		return
+	}
+	defer f.Close()
+
 	inDataBuf := new(bytes.Buffer)
 	outDataBuf := new(bytes.Buffer)
 	name, exts = inName, inExts
-	_, err = io.Copy(inDataBuf, in)
+	_, err = io.Copy(inDataBuf, f)
 	if err != nil {
 		return
 	}
