@@ -14,15 +14,7 @@ type Directive struct {
 	DirRef      *Dir
 }
 
-var DirectiveExts []string = make([]string, 0)
-
-func init() {
-	DirectiveExts = append(DirectiveExts, "js")
-	DirectiveExts = append(DirectiveExts, "coffee")
-	DirectiveExts = append(DirectiveExts, "css")
-	DirectiveExts = append(DirectiveExts, "scss")
-	DirectiveExts = append(DirectiveExts, "sass")
-}
+var DirectiveExts = []string{"js", "coffee", "css", "scss", "sass"}
 
 func NewDirective(file *File, str string) (*Directive, error) {
 	// parse name and value
