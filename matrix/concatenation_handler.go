@@ -10,7 +10,7 @@ type ConcatenationMode int
 
 const (
 	ConcatenationModePrepend ConcatenationMode = iota
-	ConcatenationModeAppend  ConcatenationMode = iota
+	ConcatenationModeAppend
 )
 
 type ConcatenationHandler struct {

@@ -94,7 +94,6 @@ func (file *File) EvaluateDirectives() error {
 		}
 	}
 	if !directiveCompatible {
-		file.Directives = make([]*Directive, 0)
 		return nil
 	}
 

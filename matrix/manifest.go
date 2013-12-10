@@ -119,7 +119,7 @@ func (manifest *Manifest) EvaluateDirectives() error {
 
 func (manifest *Manifest) ConfigureHandlers() error {
 	// Build initial handler chains
-	manifest.fileHandlers = make([]*FileHandler, 0)
+	manifest.fileHandlers = make([]*FileHandler, 0, len(manifest.FilePathMapping))
 	for _, file := range manifest.FilePathMapping {
 		fileHandler := NewFileHandler(file.Ext())
 		fileHandler.File = file
@@ -163,10 +163,7 @@ func (manifest *Manifest) outFilePath(name string, exts []string) (string, error
 	if err != nil {
 		return "", err
 	}
-	parts := []string{path}
-	for _, ext := range exts {
-		parts = append(parts, ext)
-	}
+	parts := append([]string{path}, exts...)
 	return strings.Join(parts, "."), nil
 }
 
@@ -175,11 +172,10 @@ func (manifest *Manifest) WriteOutput() error {
 	for i := len(manifest.fileHandlers); i > 0; i-- {
 		fh := manifest.fileHandlers[i-1]
 
-		/*
-			if len(fh.ParentHandlers) > 0 {
-				continue
-			}
-		*/
+		// Don't output files included as part of others
+		if len(fh.ParentHandlers) > 0 {
+			continue
+		}
 
 		f, err := os.Open(fh.File.Path())
 		if err != nil {

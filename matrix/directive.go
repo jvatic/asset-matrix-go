@@ -27,7 +27,7 @@ func NewDirective(file *File, str string) (*Directive, error) {
 }
 
 func (directive *Directive) Files() []*File {
-	files := make([]*File, 0)
+	var files []*File
 
 	if directive.FileRef != nil {
 		files = append(files, directive.FileRef)
