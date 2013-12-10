@@ -188,8 +188,7 @@ func (manifest *Manifest) WriteOutput() error {
 			return err
 		}
 
-		var outBytes []byte
-		out := bytes.NewBuffer(outBytes)
+		out := new(bytes.Buffer)
 		name, exts, err := fh.Handle(f, out, fh.File.Name(), fh.File.Exts())
 		if closeErr := f.Close(); closeErr != nil {
 			return closeErr
