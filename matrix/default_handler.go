@@ -16,8 +16,8 @@ func NewDefaultHandler(ext string) *DefaultHandler {
 }
 
 func (handler *DefaultHandler) Handle(in io.Reader, out io.Writer, inputName string, inputExts []string) (name string, exts []string, err error) {
-	io.Copy(out, in)
-	return inputName, inputExts, nil
+	_, err = io.Copy(out, in)
+	return inputName, inputExts, err
 }
 
 func (handler *DefaultHandler) OutputExt() string {

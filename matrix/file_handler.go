@@ -117,16 +117,22 @@ func (fileHandler *FileHandler) Handle(in io.Reader, out io.Writer, name string,
 	)
 	inDataBuf := bytes.NewBuffer(inData)
 	outDataBuf := bytes.NewBuffer(outData)
-	io.Copy(inDataBuf, in)
+	_, err = io.Copy(inDataBuf, in)
+	if err != nil {
+		return name, exts, err
+	}
 	for _, handler := range fileHandler.HandlerChain {
 		name, exts, err = handler.Handle(inDataBuf, outDataBuf, name, exts)
 		if err != nil {
 			return name, exts, err
 		}
 		inDataBuf.Reset()
-		io.Copy(inDataBuf, outDataBuf)
+		_, err = io.Copy(inDataBuf, outDataBuf)
+		if err != nil {
+			return name, exts, err
+		}
 		outDataBuf.Reset()
 	}
-	io.Copy(out, inDataBuf)
+	_, err = io.Copy(out, inDataBuf)
 	return name, exts, err
 }

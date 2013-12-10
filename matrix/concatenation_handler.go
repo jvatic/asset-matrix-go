@@ -33,11 +33,23 @@ func (handler *ConcatenationHandler) Handle(in io.Reader, out io.Writer, inputNa
 
 	switch handler.mode {
 	case ConcatenationModePrepend:
-		io.Copy(out, childBuf)
-		io.Copy(out, in)
+		_, err = io.Copy(out, childBuf)
+		if err != nil {
+			return inputName, inputExts, err
+		}
+		_, err = io.Copy(out, in)
+		if err != nil {
+			return inputName, inputExts, err
+		}
 	case ConcatenationModeAppend:
-		io.Copy(out, in)
-		io.Copy(out, childBuf)
+		_, err = io.Copy(out, in)
+		if err != nil {
+			return inputName, inputExts, err
+		}
+		_, err = io.Copy(out, childBuf)
+		if err != nil {
+			return inputName, inputExts, err
+		}
 	}
 
 	return inputName, inputExts, nil
