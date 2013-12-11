@@ -33,12 +33,14 @@ func (handler *CoffeeHandler) Handle(in io.Reader, out io.Writer, inName string,
 		return inName, inExts, err
 	}
 
-	errChan := make(chan error, 2)
+	errChan := make(chan error, 4)
 
 	go func() {
-		defer cmdIn.Close()
 		_, err := io.Copy(cmdIn, in)
 		if err != nil {
+			errChan <- err
+		}
+		if err := cmdIn.Close(); err != nil {
 			errChan <- err
 		}
 	}()
@@ -49,10 +51,8 @@ func (handler *CoffeeHandler) Handle(in io.Reader, out io.Writer, inName string,
 		}
 	}()
 
-	var errBytes []byte
-	errBuf := bytes.NewBuffer(errBytes)
+	errBuf := new(bytes.Buffer)
 	go func() {
-		defer cmdErr.Close()
 		_, err := io.Copy(errBuf, cmdErr)
 		if err != nil {
 			errChan <- err
@@ -60,17 +60,8 @@ func (handler *CoffeeHandler) Handle(in io.Reader, out io.Writer, inName string,
 	}()
 
 	if err := cmd.Run(); err != nil {
+		err = fmt.Errorf("%v:\n%v", err, errBuf)
 		return inName, inExts, err
-	}
-
-	if errBuf.Len() > 0 {
-		return inName, inExts, fmt.Errorf("%v", errBuf)
-	}
-
-	select {
-	case err := <-errChan:
-		return inName, inExts, err
-	default:
 	}
 
 	for _, inExt := range inExts {

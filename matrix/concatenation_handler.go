@@ -28,9 +28,9 @@ func NewConcatenationHandler(parent *FileHandler, child *FileHandler, mode Conca
 func (handler *ConcatenationHandler) Handle(in io.Reader, out io.Writer, inName string, inExts []string) (name string, exts []string, err error) {
 	name, exts = inName, inExts
 
-	handleChild := func() error {
+	handleChild := func() (err error) {
 		_, _, err = handler.child.Handle(out, inName, inExts)
-		return err
+		return
 	}
 
 	switch handler.mode {

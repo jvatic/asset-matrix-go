@@ -204,6 +204,10 @@ func (manifest *Manifest) WriteOutput() error {
 		if err != nil {
 			return err
 		}
+
+		if err := outFile.Close(); err != nil {
+			return err
+		}
 	}
 	return nil
 }

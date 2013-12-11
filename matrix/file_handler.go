@@ -1,7 +1,6 @@
 package matrix
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -111,31 +110,38 @@ func removeIncompatibleHandlers(a []Handler, b []Handler) (int, error) {
 }
 
 func (fileHandler *FileHandler) Handle(out io.Writer, inName string, inExts []string) (name string, exts []string, err error) {
+	name, exts = inName, inExts
+
 	f, err := os.Open(fileHandler.File.Path())
 	if err != nil {
 		return
 	}
-	defer f.Close()
 
-	inDataBuf := new(bytes.Buffer)
-	outDataBuf := new(bytes.Buffer)
-	name, exts = inName, inExts
-	_, err = io.Copy(inDataBuf, f)
-	if err != nil {
-		return
+	r, w := io.Pipe()
+
+	go func() {
+		_, err = io.Copy(w, f)
+
+		w.Close()
+		f.Close()
+	}()
+
+	handlerFn := func(handler Handler, in io.Reader) *io.PipeReader {
+		r, w := io.Pipe()
+		go func() {
+			name, exts, err = handler.Handle(in, w, name, exts)
+			w.Close()
+		}()
+		return r
 	}
+
 	for _, handler := range fileHandler.HandlerChain {
-		name, exts, err = handler.Handle(inDataBuf, outDataBuf, name, exts)
-		if err != nil {
-			return
-		}
-		inDataBuf.Reset()
-		_, err = io.Copy(inDataBuf, outDataBuf)
-		if err != nil {
-			return
-		}
-		outDataBuf.Reset()
+		r = handlerFn(handler, r)
 	}
-	_, err = io.Copy(out, inDataBuf)
+
+	_, finErr := io.Copy(out, r)
+	if err == nil {
+		err = finErr
+	}
 	return
 }
