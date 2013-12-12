@@ -122,7 +122,7 @@ func (fileHandler *FileHandler) Handle(out io.Writer, inName string, inExts []st
 	go func() {
 		_, err = io.Copy(w, f)
 
-		w.Close()
+		w.CloseWithError(err)
 		f.Close()
 	}()
 
@@ -130,7 +130,7 @@ func (fileHandler *FileHandler) Handle(out io.Writer, inName string, inExts []st
 		r, w := io.Pipe()
 		go func() {
 			name, exts, err = handler.Handle(in, w, name, exts)
-			w.Close()
+			w.CloseWithError(err)
 		}()
 		return r
 	}
@@ -139,9 +139,6 @@ func (fileHandler *FileHandler) Handle(out io.Writer, inName string, inExts []st
 		r = handlerFn(handler, r)
 	}
 
-	_, finErr := io.Copy(out, r)
-	if err == nil {
-		err = finErr
-	}
+	_, err = io.Copy(out, r)
 	return
 }
