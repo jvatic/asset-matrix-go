@@ -171,8 +171,14 @@ func (manifest *Manifest) outFilePath(name string, exts []string) (string, error
 	return strings.Join(parts, "."), nil
 }
 
-func (manifest *Manifest) WriteOutput() error {
+func (manifest *Manifest) WriteOutput() (err error) {
 	// Loop through fileHandlers in reverse order (least to most ParentHandlers)
+	var (
+		name    string
+		exts    []string
+		outPath string
+		outFile *os.File
+	)
 	out := new(bytes.Buffer)
 	for i := len(manifest.fileHandlers); i > 0; i-- {
 		fh := manifest.fileHandlers[i-1]
@@ -184,32 +190,33 @@ func (manifest *Manifest) WriteOutput() error {
 
 		manifest.log.Printf("Processing %s\n", fh.File.Name())
 
-		name, exts, err := fh.Handle(out, fh.File.Name(), fh.File.Exts())
-		if err != nil {
-			return err
+		name = fh.File.Name()
+		exts = fh.File.Exts()
+		if err = fh.Handle(out, &name, &exts); err != nil {
+			return
 		}
 
-		outPath, err := manifest.outFilePath(name, exts)
+		outPath, err = manifest.outFilePath(name, exts)
 		if err != nil {
-			return err
+			return
 		}
-		if err := os.MkdirAll(filepath.Dir(outPath), os.ModePerm); err != nil {
-			return err
+		if err = os.MkdirAll(filepath.Dir(outPath), os.ModePerm); err != nil {
+			return
 		}
-		outFile, err := os.Create(outPath)
+		outFile, err = os.Create(outPath)
 		if err != nil {
-			return err
+			return
 		}
 		_, err = io.Copy(outFile, out)
 		if err != nil {
-			return err
+			return
 		}
 
-		if err := outFile.Close(); err != nil {
-			return err
+		if err = outFile.Close(); err != nil {
+			return
 		}
 
 		out.Reset()
 	}
-	return nil
+	return
 }

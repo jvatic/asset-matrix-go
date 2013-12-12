@@ -13,22 +13,22 @@ func init() {
 	Register("coffee", "js", new(CoffeeHandler), &HandlerOptions{InputMode: InputModeFlow, OutputMode: OutputModeFlow})
 }
 
-func (handler *CoffeeHandler) Handle(in io.Reader, out io.Writer, inName string, inExts []string) (name string, exts []string, err error) {
+func (handler *CoffeeHandler) Handle(in io.Reader, out io.Writer, name *string, exts *[]string) (err error) {
 	cmd := exec.Command("coffee", "--compile", "--stdio")
 
 	cmdIn, err := cmd.StdinPipe()
 	if err != nil {
-		return inName, inExts, err
+		return
 	}
 
 	cmdOut, err := cmd.StdoutPipe()
 	if err != nil {
-		return inName, inExts, err
+		return
 	}
 
 	cmdErr, err := cmd.StderrPipe()
 	if err != nil {
-		return inName, inExts, err
+		return
 	}
 
 	errChan := make(chan error, 4)
@@ -57,19 +57,21 @@ func (handler *CoffeeHandler) Handle(in io.Reader, out io.Writer, inName string,
 		}
 	}()
 
-	if err := cmd.Run(); err != nil {
+	if err = cmd.Run(); err != nil {
 		err = fmt.Errorf("%v:\n%v", err, errBuf)
-		return inName, inExts, err
+		return
 	}
 
-	for _, inExt := range inExts {
+	var outExts []string
+	for _, inExt := range *exts {
 		if inExt != "coffee" && inExt != "js" {
-			exts = append(exts, inExt)
+			outExts = append(outExts, inExt)
 		}
 	}
-	exts = append(exts, "js")
+	outExts = append(outExts, "js")
+	*exts = outExts
 
-	return inName, exts, nil
+	return
 }
 
 func (handler *CoffeeHandler) OutputExt() string {

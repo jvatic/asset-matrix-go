@@ -19,7 +19,7 @@ const (
 )
 
 type Handler interface {
-	Handle(in io.Reader, out io.Writer, inputName string, inputExts []string) (name string, exts []string, err error)
+	Handle(in io.Reader, out io.Writer, name *string, exts *[]string) (err error)
 	OutputExt() string
 }
 

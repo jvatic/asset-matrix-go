@@ -109,9 +109,7 @@ func removeIncompatibleHandlers(a []Handler, b []Handler) (int, error) {
 	return 0, fmt.Errorf("matrix: FileHandler: incompatible handler chains: %v, %v", a, b)
 }
 
-func (fileHandler *FileHandler) Handle(out io.Writer, inName string, inExts []string) (name string, exts []string, err error) {
-	name, exts = inName, inExts
-
+func (fileHandler *FileHandler) Handle(out io.Writer, name *string, exts *[]string) (err error) {
 	f, err := os.Open(fileHandler.File.Path())
 	if err != nil {
 		return
@@ -129,7 +127,7 @@ func (fileHandler *FileHandler) Handle(out io.Writer, inName string, inExts []st
 	handlerFn := func(handler Handler, in io.Reader) *io.PipeReader {
 		r, w := io.Pipe()
 		go func() {
-			name, exts, err = handler.Handle(in, w, name, exts)
+			err = handler.Handle(in, w, name, exts)
 			w.CloseWithError(err)
 		}()
 		return r

@@ -23,11 +23,12 @@ func NewConcatenationHandler(parent *FileHandler, child *FileHandler, mode Conca
 	return &ConcatenationHandler{parent: parent, child: child, mode: mode, ext: ext}
 }
 
-func (handler *ConcatenationHandler) Handle(in io.Reader, out io.Writer, inName string, inExts []string) (name string, exts []string, err error) {
-	name, exts = inName, inExts
-
+func (handler *ConcatenationHandler) Handle(in io.Reader, out io.Writer, name *string, exts *[]string) (err error) {
 	handleChild := func() (err error) {
-		_, _, err = handler.child.Handle(out, inName, inExts)
+		child := handler.child
+		childName := child.File.Name()
+		childExts := child.File.Exts()
+		err = child.Handle(out, &childName, &childExts)
 		return
 	}
 
