@@ -159,6 +159,15 @@ func (manifest *Manifest) ConfigureHandlers() error {
 		}
 	}
 
+	// Remove duplicate concatenation handlers
+	for _, fh := range manifest.fileHandlers {
+		// Skip over non-top level file handlers
+		if len(fh.ParentHandlers) > 0 {
+			continue
+		}
+		fh.CleanConcatenationChain()
+	}
+
 	return nil
 }
 

@@ -63,6 +63,40 @@ func (fileHandler *FileHandler) AddParentFileHandler(fh *FileHandler) {
 	fileHandler.ParentHandlers = append(fileHandler.ParentHandlers, fh)
 }
 
+func (fileHandler *FileHandler) CleanConcatenationChain() {
+	var children []*FileHandler
+	var handlers []*ConcatenationHandler
+	for _, h := range fileHandler.HandlerChain {
+		if ch, ok := h.(*ConcatenationHandler); ok {
+			children = append(children, ch.child)
+			handlers = append(handlers, ch)
+		}
+	}
+
+	for _, ch := range handlers {
+		for _, fh := range children {
+			ch.child.removeChild(fh)
+		}
+	}
+}
+
+func (fileHandler *FileHandler) removeChild(fh *FileHandler) {
+	var chain []Handler
+	for _, h := range fileHandler.HandlerChain {
+		if ch, ok := h.(*ConcatenationHandler); ok {
+			if ch.child == fh {
+				continue
+			} else {
+				ch.child.removeChild(fh)
+			}
+		}
+
+		chain = append(chain, h)
+	}
+
+	fileHandler.HandlerChain = chain
+}
+
 func (parent *FileHandler) concatenateAtIndex(child *FileHandler, handlerIndex int) {
 	mode := ConcatenationModePrepend
 	for _, fh := range parent.FileSet {
