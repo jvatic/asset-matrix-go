@@ -41,7 +41,7 @@ func (fileHandler *FileHandler) buildHandlerChain(inExt string) {
 }
 
 func (fileHandler *FileHandler) addHandlerAfterIndex(handler Handler, index int) {
-	chain := make([]Handler, 0)
+	var chain []Handler
 	for i, h := range fileHandler.HandlerChain {
 		chain = append(chain, h)
 		if i == index {
