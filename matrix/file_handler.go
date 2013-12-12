@@ -95,15 +95,35 @@ func (fileHandler *FileHandler) AddParentFileHandler(fh *FileHandler) {
 
 func (fileHandler *FileHandler) CleanConcatenationChain() {
 	var children []*FileHandler
-	var handlers []*ConcatenationHandler
+	var chain []Handler
+	var chandlers []*ConcatenationHandler
 	for _, h := range fileHandler.HandlerChain {
+		uniq := true
+		for _, handler := range chain {
+			if ch, ok := h.(*ConcatenationHandler); ok {
+				if chandler, ok := handler.(*ConcatenationHandler); ok {
+					if ch.child == chandler.child {
+						uniq = false
+						break
+					}
+				}
+			}
+		}
+		if uniq {
+			chain = append(chain, h)
+		} else {
+			continue
+		}
+
 		if ch, ok := h.(*ConcatenationHandler); ok {
 			children = append(children, ch.child)
-			handlers = append(handlers, ch)
+			chandlers = append(chandlers, ch)
 		}
 	}
 
-	for _, ch := range handlers {
+	fileHandler.HandlerChain = chain
+
+	for _, ch := range chandlers {
 		for _, fh := range children {
 			ch.child.removeChild(fh)
 		}
