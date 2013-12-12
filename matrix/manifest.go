@@ -173,6 +173,7 @@ func (manifest *Manifest) outFilePath(name string, exts []string) (string, error
 
 func (manifest *Manifest) WriteOutput() error {
 	// Loop through fileHandlers in reverse order (least to most ParentHandlers)
+	out := new(bytes.Buffer)
 	for i := len(manifest.fileHandlers); i > 0; i-- {
 		fh := manifest.fileHandlers[i-1]
 
@@ -183,7 +184,6 @@ func (manifest *Manifest) WriteOutput() error {
 
 		manifest.log.Printf("Processing %s\n", fh.File.Name())
 
-		out := new(bytes.Buffer)
 		name, exts, err := fh.Handle(out, fh.File.Name(), fh.File.Exts())
 		if err != nil {
 			return err
@@ -208,6 +208,8 @@ func (manifest *Manifest) WriteOutput() error {
 		if err := outFile.Close(); err != nil {
 			return err
 		}
+
+		out.Reset()
 	}
 	return nil
 }
