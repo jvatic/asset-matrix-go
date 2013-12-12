@@ -41,7 +41,7 @@ func (a byLenParentHandlersReversed) Less(i, j int) bool {
 	return len(a[j].ParentHandlers) < len(a[i].ParentHandlers)
 }
 
-var fdBucket = make(chan struct{}, 10)
+var fdBucket = make(chan struct{}, 150)
 
 func SetFDLimit(limit int) {
 	fdBucket = make(chan struct{}, limit)

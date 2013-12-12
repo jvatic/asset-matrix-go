@@ -12,7 +12,7 @@ func main() {
 	fmt.Println("Compiling assets...")
 
 	outputDir := flag.String("output", "./output", "path to output directory")
-	fdLimit := flag.Int("fdlimit", 10, "max open file descriptors allowed")
+	fdLimit := flag.Int("fdlimit", 150, "max open file descriptors allowed")
 	flag.Parse()
 	inputPaths := flag.Args()
 
