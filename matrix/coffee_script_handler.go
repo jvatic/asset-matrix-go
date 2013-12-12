@@ -14,6 +14,23 @@ func init() {
 }
 
 func (handler *CoffeeHandler) Handle(in io.Reader, out io.Writer, name *string, exts *[]string) (err error) {
+	if shouldExecCommand() {
+		fmt.Println("cmd.Run()")
+	} else {
+		fmt.Println("buffer")
+		data := new(bytes.Buffer)
+
+		_, err = io.Copy(data, in)
+		if err != nil {
+			return
+		}
+
+		in = data
+
+		waitCommand()
+	}
+	defer commandDone()
+
 	cmd := exec.Command("coffee", "--compile", "--stdio")
 
 	cmdIn, err := cmd.StdinPipe()
