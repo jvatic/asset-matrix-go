@@ -177,50 +177,63 @@ func (manifest *Manifest) outFilePath(name string, exts []string) (string, error
 
 func (manifest *Manifest) WriteOutput() (err error) {
 	// Loop through fileHandlers in reverse order (least to most ParentHandlers)
-	var (
-		name    string
-		exts    []string
-		outPath string
-		outFile *os.File
-	)
-	out := new(bytes.Buffer)
+	done := make(chan struct{}, len(manifest.fileHandlers))
 	for i := len(manifest.fileHandlers); i > 0; i-- {
 		fh := manifest.fileHandlers[i-1]
 
 		// Don't output files included as part of others
 		if len(fh.ParentHandlers) > 0 {
+			done <- struct{}{}
 			continue
 		}
 
-		manifest.log.Printf("Processing %s\n", fh.File.Name())
+		go func() {
+			out := new(bytes.Buffer)
+			var (
+				name    string
+				exts    []string
+				outPath string
+				outFile *os.File
+			)
 
-		name = fh.File.Name()
-		exts = fh.File.Exts()
-		if err = fh.Handle(out, &name, &exts); err != nil {
-			return
-		}
+			manifest.log.Printf("Processing %s\n", fh.File.Name())
 
-		outPath, err = manifest.outFilePath(name, exts)
-		if err != nil {
-			return
-		}
-		if err = os.MkdirAll(filepath.Dir(outPath), os.ModePerm); err != nil {
-			return
-		}
-		outFile, err = os.Create(outPath)
-		if err != nil {
-			return
-		}
-		_, err = io.Copy(outFile, out)
-		if err != nil {
-			return
-		}
+			name = fh.File.Name()
+			exts = fh.File.Exts()
+			if err = fh.Handle(out, &name, &exts); err != nil {
+				return
+			}
 
-		if err = outFile.Close(); err != nil {
-			return
-		}
+			manifest.log.Printf("Writing %s\n", fh.File.Name())
 
-		out.Reset()
+			outPath, err = manifest.outFilePath(name, exts)
+			if err != nil {
+				return
+			}
+			if err = os.MkdirAll(filepath.Dir(outPath), os.ModePerm); err != nil {
+				return
+			}
+			outFile, err = os.Create(outPath)
+			if err != nil {
+				return
+			}
+			_, err = io.Copy(outFile, out)
+			if err != nil {
+				return
+			}
+
+			if err = outFile.Close(); err != nil {
+				return
+			}
+
+			done <- struct{}{}
+		}()
+
 	}
+
+	for i := 0; i < len(manifest.fileHandlers); i++ {
+		<-done
+	}
+
 	return
 }
