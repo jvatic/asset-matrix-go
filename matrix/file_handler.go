@@ -41,11 +41,41 @@ func (fileHandler *FileHandler) buildHandlerChain(inExt string) {
 	}
 }
 
+func (fileHandler *FileHandler) concatenationOrderLess(a *ConcatenationHandler, b *ConcatenationHandler) bool {
+	ai, bi := -1, -1
+	for i, fh := range fileHandler.FileSet {
+		if a.child == fh {
+			ai = i
+		}
+
+		if b.child == fh {
+			bi = i
+		}
+
+		if ai > -1 && bi > -1 {
+			break
+		}
+	}
+
+	return ai < bi
+}
+
 func (fileHandler *FileHandler) addHandlerAfterIndex(handler Handler, index int) {
-	var chain []Handler
+	l := len(fileHandler.HandlerChain)
+	chain := make([]Handler, 0, l)
 	for i, h := range fileHandler.HandlerChain {
 		chain = append(chain, h)
 		if i == index {
+			if i < l-1 {
+				if ch, ok := fileHandler.HandlerChain[i+1].(*ConcatenationHandler); ok {
+					if chandler, ok := handler.(*ConcatenationHandler); ok {
+						if fileHandler.concatenationOrderLess(chandler, ch) {
+							index++
+							continue
+						}
+					}
+				}
+			}
 			chain = append(chain, handler)
 		}
 	}
@@ -131,17 +161,28 @@ func (fileHandler *FileHandler) MergeWithParents() error {
 	return nil
 }
 
-func removeIncompatibleHandlers(a []Handler, b []Handler) (int, error) {
-	for i := len(a) - 1; i >= 0; i-- {
-		for j := len(b) - 1; j >= 0; j-- {
-			if a[i].OutputExt() == b[j].OutputExt() {
-				a = a[0:i]
-				return j, nil
+func removeIncompatibleHandlers(a []Handler, b []Handler) (index int, err error) {
+	findIndex := func() int {
+		for i := len(a) - 1; i >= 0; i-- {
+			for j := len(b) - 1; j >= 0; j-- {
+				if _, ok := b[j].(*ConcatenationHandler); ok {
+					if j > 0 {
+						continue
+					}
+				}
+				if a[i].OutputExt() == b[j].OutputExt() {
+					a = a[0:i]
+					return j
+				}
 			}
 		}
+		return -1
 	}
-
-	return 0, fmt.Errorf("matrix: FileHandler: incompatible handler chains: %v, %v", a, b)
+	index = findIndex()
+	if index == -1 {
+		err = fmt.Errorf("matrix: FileHandler: incompatible handler chains: %v, %v", a, b)
+	}
+	return
 }
 
 func (fileHandler *FileHandler) Handle(out io.Writer, name *string, exts *[]string) (err error) {
