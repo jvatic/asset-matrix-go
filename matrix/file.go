@@ -91,6 +91,7 @@ func (file *File) EvaluateDirectives() error {
 	for _, ext := range DirectiveExts {
 		if ext == fileExt {
 			directiveCompatible = true
+			break
 		}
 	}
 	if !directiveCompatible {
