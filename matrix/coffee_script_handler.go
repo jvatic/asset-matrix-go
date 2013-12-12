@@ -14,7 +14,7 @@ func init() {
 }
 
 func (handler *CoffeeHandler) RequiredFds() int {
-	return 1
+	return 3 // stdin, stdout, stderr
 }
 
 func (handler *CoffeeHandler) Handle(in io.Reader, out io.Writer, name *string, exts *[]string) (err error) {
