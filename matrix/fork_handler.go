@@ -6,8 +6,6 @@ import (
 )
 
 type ForkHandler struct {
-	Handler
-
 	fileHandler *FileHandler
 	ext         string
 }

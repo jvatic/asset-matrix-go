@@ -7,9 +7,7 @@ import (
 	"os/exec"
 )
 
-type CoffeeHandler struct {
-	Handler
-}
+type CoffeeHandler struct{}
 
 func init() {
 	Register("coffee", "js", new(CoffeeHandler), &HandlerOptions{InputMode: InputModeFlow, OutputMode: OutputModeFlow})

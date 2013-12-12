@@ -6,8 +6,6 @@ import (
 )
 
 type DefaultHandler struct {
-	Handler
-
 	ext string
 }
 

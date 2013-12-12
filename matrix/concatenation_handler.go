@@ -13,8 +13,6 @@ const (
 )
 
 type ConcatenationHandler struct {
-	Handler
-
 	parent *FileHandler
 	child  *FileHandler
 	mode   ConcatenationMode
