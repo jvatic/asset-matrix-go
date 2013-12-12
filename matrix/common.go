@@ -52,23 +52,29 @@ func fdLimit() int {
 }
 
 func shouldOpenFD(n int) bool {
+	j := 0
 	for {
 		select {
 		case fdBucket <- struct{}{}:
-			n--
-			if n == 0 {
+			j++
+			if j == n {
 				return true
 			}
 		default:
+			fdClosed(j)
 			return false
 		}
 	}
 }
 
-func waitFD() {
-	fdBucket <- struct{}{}
+func waitFD(n int) {
+	for i := 0; i < n; i++ {
+		fdBucket <- struct{}{}
+	}
 }
 
-func fdClosed() {
-	<-fdBucket
+func fdClosed(n int) {
+	for i := 0; i < n; i++ {
+		<-fdBucket
+	}
 }

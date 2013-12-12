@@ -112,7 +112,7 @@ func removeIncompatibleHandlers(a []Handler, b []Handler) (int, error) {
 
 func (fileHandler *FileHandler) Handle(out io.Writer, name *string, exts *[]string) (err error) {
 	if !shouldOpenFD(1) {
-		waitFD()
+		waitFD(1)
 	}
 
 	f, err := os.Open(fileHandler.File.Path())
@@ -127,7 +127,7 @@ func (fileHandler *FileHandler) Handle(out io.Writer, name *string, exts *[]stri
 
 		w.CloseWithError(err)
 		f.Close()
-		fdClosed()
+		fdClosed(1)
 	}()
 
 	handlerFn := func(handler Handler, in io.Reader) *io.PipeReader {
@@ -148,9 +148,9 @@ func (fileHandler *FileHandler) Handle(out io.Writer, name *string, exts *[]stri
 
 					in = data
 
-					waitFD()
+					waitFD(nFds)
 				}
-				defer fdClosed()
+				defer fdClosed(nFds)
 			}
 
 			err = handler.Handle(in, w, name, exts)

@@ -201,9 +201,9 @@ func (manifest *Manifest) WriteOutput() (err error) {
 			}
 
 			if !shouldOpenFD(1) {
-				waitFD()
+				waitFD(1)
 			}
-			defer fdClosed()
+			defer fdClosed(1)
 
 			manifest.log.Printf("Writing %s\n", fh.File.Name())
 
