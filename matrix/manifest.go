@@ -200,6 +200,11 @@ func (manifest *Manifest) WriteOutput() (err error) {
 				return
 			}
 
+			if !shouldOpenFD(1) {
+				waitFD()
+			}
+			defer fdClosed()
+
 			manifest.log.Printf("Writing %s\n", fh.File.Name())
 
 			outPath, err = manifest.outFilePath(name, exts)

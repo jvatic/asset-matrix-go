@@ -40,3 +40,35 @@ func (a byLenParentHandlersReversed) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
 func (a byLenParentHandlersReversed) Less(i, j int) bool {
 	return len(a[j].ParentHandlers) < len(a[i].ParentHandlers)
 }
+
+var fdBucket = make(chan struct{}, 10)
+
+func SetFDLimit(limit int) {
+	fdBucket = make(chan struct{}, limit)
+}
+
+func fdLimit() int {
+	return cap(fdBucket)
+}
+
+func shouldOpenFD(n int) bool {
+	for {
+		select {
+		case fdBucket <- struct{}{}:
+			n--
+			if n == 0 {
+				return true
+			}
+		default:
+			return false
+		}
+	}
+}
+
+func waitFD() {
+	fdBucket <- struct{}{}
+}
+
+func fdClosed() {
+	<-fdBucket
+}

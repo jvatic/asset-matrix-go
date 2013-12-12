@@ -53,31 +53,3 @@ func FindHandlers(inExt string) map[string]*RegisteredHandler {
 type FDHandler interface {
 	RequiredFds() int // returns the number of required file descriptors
 }
-
-var fdBucket = make(chan struct{}, 10)
-
-func SetFDLimit(limit int) {
-	fdBucket = make(chan struct{}, limit)
-}
-
-func shouldOpenFD(n int) bool {
-	for {
-		select {
-		case fdBucket <- struct{}{}:
-			n--
-			if n == 0 {
-				return true
-			}
-		default:
-			return false
-		}
-	}
-}
-
-func waitFD() {
-	fdBucket <- struct{}{}
-}
-
-func fdClosed() {
-	<-fdBucket
-}
