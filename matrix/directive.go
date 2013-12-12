@@ -87,9 +87,7 @@ func (directive *Directive) evaluateExt(path string) string {
 	return filepath.Ext(path)
 }
 
-func dirFiles(dir *Dir) []*File {
-	files := make([]*File, 0)
-
+func dirFiles(dir *Dir) (files []*File) {
 	for _, file := range dir.Files {
 		files = append(files, file)
 	}
@@ -100,7 +98,7 @@ func dirFiles(dir *Dir) []*File {
 		}
 	}
 
-	return files
+	return
 }
 
 func (directive *Directive) String() string {
