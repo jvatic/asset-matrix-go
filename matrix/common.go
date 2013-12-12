@@ -40,26 +40,3 @@ func (a byLenParentHandlersReversed) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
 func (a byLenParentHandlersReversed) Less(i, j int) bool {
 	return len(a[j].ParentHandlers) < len(a[i].ParentHandlers)
 }
-
-var commandBucket = make(chan struct{}, 10)
-
-func setCommandBucketLimit(limit int) {
-	commandBucket = make(chan struct{}, limit)
-}
-
-func shouldExecCommand() bool {
-	select {
-	case commandBucket <- struct{}{}:
-		return true
-	default:
-		return false
-	}
-}
-
-func waitCommand() {
-	commandBucket <- struct{}{}
-}
-
-func commandDone() {
-	<-commandBucket
-}

@@ -12,12 +12,13 @@ func main() {
 	fmt.Println("Compiling assets...")
 
 	outputDir := flag.String("output", "./output", "path to output directory")
-	cCmdLimit := flag.Int("ccmd", 10, "max concurrent exec commands")
+	fdLimit := flag.Int("fdlimit", 10, "max open file descriptors allowed")
 	flag.Parse()
 	inputPaths := flag.Args()
 
+	matrix.SetFDLimit(*fdLimit)
+
 	inputManifest := matrix.NewManifest(inputPaths, *outputDir, os.Stdout)
-	inputManifest.SetCCmdLimit(*cCmdLimit)
 	if err := inputManifest.ScanInputDirs(); err != nil {
 		fmt.Printf("Error: %s\n", err.Error())
 	}

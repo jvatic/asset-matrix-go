@@ -32,10 +32,6 @@ func NewManifest(inputDirs []string, outputDir string, logOut io.Writer) *Manife
 	return manifest
 }
 
-func (manifest *Manifest) SetCCmdLimit(limit int) {
-	setCommandBucketLimit(limit)
-}
-
 func (manifest *Manifest) AddDir(dir *Dir) {
 	manifest.DirPathMapping[dir.Path()] = dir
 

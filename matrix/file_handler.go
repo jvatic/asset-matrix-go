@@ -1,6 +1,7 @@
 package matrix
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -127,6 +128,26 @@ func (fileHandler *FileHandler) Handle(out io.Writer, name *string, exts *[]stri
 	handlerFn := func(handler Handler, in io.Reader) *io.PipeReader {
 		r, w := io.Pipe()
 		go func() {
+			if fdHandler, ok := handler.(FDHandler); ok {
+				// handler requires file descriptors
+				nFds := fdHandler.RequiredFds()
+
+				if nFds > 0 && !shouldOpenFD(nFds) {
+					data := new(bytes.Buffer)
+
+					_, err := io.Copy(data, in)
+					if err != nil {
+						w.CloseWithError(err)
+						return
+					}
+
+					in = data
+
+					waitFD()
+				}
+				defer fdClosed()
+			}
+
 			err = handler.Handle(in, w, name, exts)
 			w.CloseWithError(err)
 		}()

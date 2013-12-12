@@ -13,21 +13,11 @@ func init() {
 	Register("coffee", "js", new(CoffeeHandler), &HandlerOptions{InputMode: InputModeFlow, OutputMode: OutputModeFlow})
 }
 
+func (handler *CoffeeHandler) RequiredFds() int {
+	return 1
+}
+
 func (handler *CoffeeHandler) Handle(in io.Reader, out io.Writer, name *string, exts *[]string) (err error) {
-	if !shouldExecCommand() {
-		data := new(bytes.Buffer)
-
-		_, err = io.Copy(data, in)
-		if err != nil {
-			return
-		}
-
-		in = data
-
-		waitCommand()
-	}
-	defer commandDone()
-
 	cmd := exec.Command("coffee", "--compile", "--stdio")
 
 	cmdIn, err := cmd.StdinPipe()
