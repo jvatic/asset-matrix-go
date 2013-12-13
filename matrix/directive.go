@@ -6,12 +6,11 @@ import (
 )
 
 type Directive struct {
-	File        *File
-	InputString string
-	Name        string
-	Value       string
-	FileRef     *File
-	DirRef      *Dir
+	File    *File
+	Name    string
+	Value   string
+	FileRef *File
+	DirRef  *Dir
 }
 
 var DirectiveExts = []string{"js", "coffee", "css", "scss", "sass"}
@@ -23,7 +22,7 @@ func NewDirective(file *File, str string) (*Directive, error) {
 		return nil, fmt.Errorf("matrix: invalid directive string: %s", str)
 	}
 
-	return &Directive{File: file, InputString: str, Name: match[0][1], Value: match[0][2]}, nil
+	return &Directive{File: file, Name: match[0][1], Value: match[0][2]}, nil
 }
 
 func (directive *Directive) Files() []*File {
