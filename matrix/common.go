@@ -23,24 +23,6 @@ type AssetPointer interface {
 	IsRoot() bool
 }
 
-// byLenParentHandlerChain sort.Interface
-type byLenHandlerChain []*FileHandler
-
-func (a byLenHandlerChain) Len() int      { return len(a) }
-func (a byLenHandlerChain) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
-func (a byLenHandlerChain) Less(i, j int) bool {
-	return len(a[i].HandlerChain) < len(a[j].HandlerChain)
-}
-
-// byLenParentHandlersReversed implements sort.Interface
-type byLenParentHandlersReversed []*FileHandler
-
-func (a byLenParentHandlersReversed) Len() int      { return len(a) }
-func (a byLenParentHandlersReversed) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
-func (a byLenParentHandlersReversed) Less(i, j int) bool {
-	return len(a[j].ParentHandlers) < len(a[i].ParentHandlers)
-}
-
 var fdBucket = make(chan struct{}, 150)
 
 func SetFDLimit(limit int) {

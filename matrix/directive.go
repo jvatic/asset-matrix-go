@@ -6,11 +6,10 @@ import (
 )
 
 type Directive struct {
-	File    *File
-	Name    string
-	Value   string
-	FileRef *File
-	DirRef  *Dir
+	File     *File
+	Name     string
+	Value    string
+	FileRefs []*File
 }
 
 var DirectiveExts = []string{"js", "coffee", "css", "scss", "sass"}
@@ -25,20 +24,6 @@ func NewDirective(file *File, str string) (*Directive, error) {
 	return &Directive{File: file, Name: match[0][1], Value: match[0][2]}, nil
 }
 
-func (directive *Directive) Files() []*File {
-	var files []*File
-
-	if directive.FileRef != nil {
-		files = append(files, directive.FileRef)
-	} else if directive.DirRef != nil {
-		for _, file := range dirFiles(directive.DirRef) {
-			files = append(files, file)
-		}
-	}
-
-	return files
-}
-
 func (directive *Directive) Evaluate() error {
 	switch directive.Name {
 	case "require":
@@ -51,9 +36,9 @@ func (directive *Directive) Evaluate() error {
 			return fmt.Errorf("matrix: require: file not found: %s — %s", name, directive.File.Path())
 		}
 
-		directive.FileRef = file
+		directive.FileRefs = append(directive.FileRefs, file)
 	case "require_self":
-		directive.FileRef = directive.File
+		directive.FileRefs = append(directive.FileRefs, directive.File)
 	case "require_tree":
 		name := directive.evaluateName(directive.Value)
 
@@ -62,7 +47,9 @@ func (directive *Directive) Evaluate() error {
 			return fmt.Errorf("matrix: require_tree: dir not found: %s", name)
 		}
 
-		directive.DirRef = dir
+		for _, file := range dirFiles(dir) {
+			directive.FileRefs = append(directive.FileRefs, file)
+		}
 	default:
 		return fmt.Errorf("matrix: unknown directive \"%s\" — %s", directive.Name, directive.File.Path())
 	}

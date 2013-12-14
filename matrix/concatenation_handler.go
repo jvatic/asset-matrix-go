@@ -13,44 +13,21 @@ const (
 )
 
 type ConcatenationHandler struct {
-	parent *FileHandler
-	child  *FileHandler
-	mode   ConcatenationMode
-	ext    string
+	childIn io.Reader
+	mode    ConcatenationMode
+	ext     string
 }
 
-func NewConcatenationHandler(parent *FileHandler, child *FileHandler, mode ConcatenationMode, ext string) (handler *ConcatenationHandler) {
-	return &ConcatenationHandler{parent: parent, child: child, mode: mode, ext: ext}
+func NewConcatenationHandler(childIn io.Reader, mode ConcatenationMode, ext string) (handler *ConcatenationHandler) {
+	return &ConcatenationHandler{childIn, mode, ext}
 }
 
 func (handler *ConcatenationHandler) Handle(in io.Reader, out io.Writer, name *string, exts *[]string) (err error) {
-	handleChild := func() (err error) {
-		child := handler.child
-		childName := child.File.Name()
-		childExts := child.File.Exts()
-		err = child.Handle(out, &childName, &childExts)
-		return
-	}
-
 	switch handler.mode {
 	case ConcatenationModePrepend:
-		err = handleChild()
-		if err != nil {
-			return
-		}
-		_, err = io.Copy(out, in)
-		if err != nil {
-			return
-		}
+		// TODO
 	case ConcatenationModeAppend:
-		_, err = io.Copy(out, in)
-		if err != nil {
-			return
-		}
-		err = handleChild()
-		if err != nil {
-			return
-		}
+		// TODO
 	}
 
 	return
@@ -61,9 +38,5 @@ func (handler *ConcatenationHandler) OutputExt() string {
 }
 
 func (handler *ConcatenationHandler) String() string {
-	var name string
-	if handler.child.File != nil {
-		name = handler.child.File.Name()
-	}
-	return fmt.Sprintf("ConcatenationHandler(%s — %v)", name, handler.child.HandlerChain)
+	return fmt.Sprintf("ConcatenationHandler{%p}(%s)", handler, handler.ext)
 }

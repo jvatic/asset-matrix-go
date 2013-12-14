@@ -6,16 +6,15 @@ import (
 )
 
 type ForkHandler struct {
-	fileHandler *FileHandler
-	ext         string
+	ext string
 }
 
-func NewForkHandler(fileHandler *FileHandler, ext string) (handler *ForkHandler) {
-	return &ForkHandler{fileHandler: fileHandler, ext: ext}
+func NewForkHandler(ext string) (handler *ForkHandler) {
+	return &ForkHandler{ext: ext}
 }
 
 func (handler *ForkHandler) Handle(in io.Reader, out io.Writer, name *string, exts *[]string) (err error) {
-	// TODO: feed copy of input stream into fileHandler's handler chain
+	// TODO: feed copy of input stream into file's handler chain
 	return
 }
 

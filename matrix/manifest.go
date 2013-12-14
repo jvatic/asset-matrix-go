@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 )
 
@@ -22,7 +21,6 @@ type Manifest struct {
 	DirPathMapping  map[string]*Dir
 	FilePathMapping map[string]*File
 	NameMapping     map[string]*AssetMap
-	fileHandlers    []*FileHandler
 	log             *log.Logger
 }
 
@@ -115,6 +113,8 @@ func (manifest *Manifest) EvaluateDirectives() error {
 			if err := file.EvaluateDirectives(); err != nil {
 				return err
 			}
+
+			file.LinkChildren()
 		}
 	}
 
@@ -122,46 +122,16 @@ func (manifest *Manifest) EvaluateDirectives() error {
 }
 
 func (manifest *Manifest) ConfigureHandlers() error {
-	// Build initial handler chains
-	manifest.fileHandlers = make([]*FileHandler, 0, len(manifest.FilePathMapping))
-	for _, file := range manifest.FilePathMapping {
-		fileHandler := NewFileHandler(file.Ext())
-		fileHandler.File = file
-		file.FileHandler = fileHandler
-		manifest.fileHandlers = append(manifest.fileHandlers, fileHandler)
+	for _, f := range manifest.FilePathMapping {
+		f.DedupParents()
 	}
-
-	// Build lists of parent/child file handlers
-	for _, file := range manifest.FilePathMapping {
-		selfAdded := false
-		for _, directive := range file.Directives {
-			for _, f := range directive.Files() {
-				fileHandler := f.FileHandler
-				if fileHandler == file.FileHandler {
-					selfAdded = true
-				}
-				file.FileHandler.AddFileHandler(fileHandler)
-			}
-		}
-
-		if !selfAdded {
-			file.FileHandler.AddFileHandler(file.FileHandler)
-		}
+	for _, f := range manifest.FilePathMapping {
+		f.BuildHandlerChain(f.Ext())
 	}
-
-	// Sort file handlers by len(fh.ParentHandlers) (most to least)
-	sort.Sort(byLenParentHandlersReversed(manifest.fileHandlers))
-
-	// Insert concatenation handlers
-	for _, fh := range manifest.fileHandlers {
-		if err := fh.MergeWithParents(); err != nil {
+	for _, f := range manifest.FilePathMapping {
+		if err := f.InsertConcatenationHandlers(); err != nil {
 			return err
 		}
-	}
-
-	// Remove duplicate concatenation handlers
-	for _, fh := range manifest.fileHandlers {
-		fh.CleanConcatenationChain()
 	}
 
 	return nil
@@ -178,67 +148,68 @@ func (manifest *Manifest) outFilePath(name string, exts []string) (string, error
 
 func (manifest *Manifest) WriteOutput() (err error) {
 	// Loop through fileHandlers in reverse order (least to most ParentHandlers)
-	done := make(chan struct{}, len(manifest.fileHandlers))
-	for i := len(manifest.fileHandlers); i > 0; i-- {
-		fh := manifest.fileHandlers[i-1]
+	done := make(chan struct{}, len(manifest.FilePathMapping))
 
-		// Don't output files included as part of others
-		if len(fh.ParentHandlers) > 0 {
-			done <- struct{}{}
-			continue
-		}
-
+	writeFileOutput := func(file *File) {
 		go func() {
-			out := new(bytes.Buffer)
-			var (
-				name    string
-				exts    []string
-				outPath string
-				outFile *os.File
-			)
-
-			manifest.log.Printf("Processing %s\n", fh.File.Name())
-
-			name = fh.File.Name()
-			exts = fh.File.Exts()
-			if err = fh.Handle(out, &name, &exts); err != nil {
-				return
-			}
-
-			if !shouldOpenFD(1) {
-				waitFD(1)
-			}
-			defer fdClosed(1)
-
-			manifest.log.Printf("Writing %s\n", fh.File.Name())
-
-			outPath, err = manifest.outFilePath(name, exts)
-			if err != nil {
-				return
-			}
-			if err = os.MkdirAll(filepath.Dir(outPath), os.ModePerm); err != nil {
-				return
-			}
-			outFile, err = os.Create(outPath)
-			if err != nil {
-				return
-			}
-			_, err = io.Copy(outFile, out)
-			if err != nil {
-				return
-			}
-
-			if err = outFile.Close(); err != nil {
-				return
-			}
-
-			done <- struct{}{}
+			defer func() { done <- struct{}{} }()
+			err = manifest.writeFileOutput(file)
 		}()
-
 	}
 
-	for i := 0; i < len(manifest.fileHandlers); i++ {
+	for _, f := range manifest.FilePathMapping {
+		writeFileOutput(f)
+	}
+
+	for i := 0; i < len(manifest.FilePathMapping); i++ {
 		<-done
+	}
+
+	return
+}
+
+func (manifest *Manifest) writeFileOutput(file *File) (err error) {
+	out := new(bytes.Buffer)
+	var (
+		name    string
+		exts    []string
+		outPath string
+		outFile *os.File
+	)
+
+	manifest.log.Printf("chain: %v\n", file.HandlerChain)
+
+	name = file.Name()
+	exts = file.Exts()
+	if err = file.Handle(out, &name, &exts); err != nil {
+		return
+	}
+
+	if !shouldOpenFD(1) {
+		waitFD(1)
+	}
+	defer fdClosed(1)
+
+	manifest.log.Printf("Writing %s\n", file.Name())
+
+	outPath, err = manifest.outFilePath(name, exts)
+	if err != nil {
+		return
+	}
+	if err = os.MkdirAll(filepath.Dir(outPath), os.ModePerm); err != nil {
+		return
+	}
+	outFile, err = os.Create(outPath)
+	if err != nil {
+		return
+	}
+	_, err = io.Copy(outFile, out)
+	if err != nil {
+		return
+	}
+
+	if err = outFile.Close(); err != nil {
+		return
 	}
 
 	return
