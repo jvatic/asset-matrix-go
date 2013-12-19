@@ -2,7 +2,9 @@ package matrix
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -123,13 +125,19 @@ func (file *File) parseDirectives() error {
 
 	var directives []*Directive
 
-	scanner := bufio.NewScanner(fileRef)
+	reader := bufio.NewReader(fileRef)
 
 	bytesRead := 0
-	for scanner.Scan() {
-		line := scanner.Bytes()
-
-		bytesRead = bytesRead + len(line)
+	for {
+		line, err := reader.ReadBytes('\n')
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		n := len(line)
+		line = bytes.TrimRight(line, "\r\n")
 
 		// Ignore empty lines
 		if emptyLineRegex.Match(line) {
@@ -142,6 +150,8 @@ func (file *File) parseDirectives() error {
 			break
 		}
 
+		bytesRead = bytesRead + n
+
 		directive, err := NewDirective(file, string(line))
 		if err != nil {
 			return err
@@ -152,10 +162,6 @@ func (file *File) parseDirectives() error {
 		}
 
 		directives = append(directives, directive)
-	}
-
-	if scanner.Err() != nil {
-		return scanner.Err()
 	}
 
 	file.Directives = directives

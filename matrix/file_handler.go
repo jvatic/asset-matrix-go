@@ -217,12 +217,22 @@ func (fileHandler *FileHandler) Handle(out io.Writer, name *string, exts *[]stri
 
 	r, w := io.Pipe()
 
+	buf := new(bytes.Buffer)
 	go func() {
-		_, err = io.Copy(w, f)
+		_, err = io.Copy(buf, f)
 
-		w.CloseWithError(err)
+		if err != nil {
+			w.CloseWithError(err)
+		}
+
 		f.Close()
 		fdClosed(1)
+	}()
+
+	go func() {
+		_, err = io.Copy(w, bytes.NewBuffer(buf.Bytes()[fileHandler.File.dataByteOffset:]))
+
+		w.CloseWithError(err)
 	}()
 
 	handlerFn := func(handler Handler, in io.Reader) *io.PipeReader {
