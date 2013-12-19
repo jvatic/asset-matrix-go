@@ -79,3 +79,39 @@ console.log("file 3");`
 
 	c.Assert(data.String(), BeginsWith, expectedOutput)
 }
+
+func (s *IntegrationSuite) TestRequireTree(c *C) {
+	manifest := NewManifest([]string{"./support/test_2/input"}, "./support/test_2/output", os.Stdout)
+	if err := manifest.ScanInputDirs(); err != nil {
+		c.Error(err)
+	}
+
+	if err := manifest.EvaluateDirectives(); err != nil {
+		c.Error(err)
+	}
+
+	if err := manifest.ConfigureHandlers(); err != nil {
+		c.Error(err)
+	}
+
+	if err := manifest.WriteOutput(); err != nil {
+		c.Error(err)
+	}
+
+	file, err := os.Open("./support/test_2/output/files.js")
+	if err != nil {
+		c.Error(err)
+	}
+	defer file.Close()
+	data := new(bytes.Buffer)
+	if _, err := io.Copy(data, file); err != nil {
+		c.Error(err)
+	}
+
+	expectedOutput := `console.log("file 1");
+console.log("file 2");
+console.log("file 3");
+console.log("file 4");`
+
+	c.Assert(data.String(), BeginsWith, expectedOutput)
+}
