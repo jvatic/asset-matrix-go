@@ -28,6 +28,7 @@ type Matrix struct {
 	transformerJSPath string
 	scssJSPath        string
 	erbRBPath         string
+	prevManifest      *Manifest
 	Manifest          *Manifest
 }
 
@@ -56,6 +57,7 @@ func (m *Matrix) Build() error {
 	}
 	m.cacheBreaker = fmt.Sprintf("%x", md5.Sum(hashData))
 
+	m.prevManifest = m.parsePrevManifest()
 	m.Manifest = &Manifest{
 		Assets: make(map[string]string, 0),
 	}
@@ -142,6 +144,30 @@ func (m *Matrix) Build() error {
 	duration := time.Since(startedAt)
 	log.Printf("Completed in %s", duration)
 	return nil
+}
+
+func (m *Matrix) parsePrevManifest() *Manifest {
+	prevManifest := &Manifest{
+		Assets: make(map[string]string, 0),
+	}
+	file, err := os.Open(filepath.Join(m.config.OutputDir, "manifest.json"))
+	if err != nil {
+		return prevManifest
+	}
+	defer file.Close()
+	json.NewDecoder(file).Decode(&prevManifest)
+	return prevManifest
+}
+
+func (m *Matrix) RemoveOldAssets() {
+	log.Println("Removing old assets...")
+	for logicalPath, path := range m.prevManifest.Assets {
+		if m.Manifest.Assets[logicalPath] == path {
+			continue
+		}
+		p := filepath.Join(m.config.OutputDir, path)
+		os.Remove(p)
+	}
 }
 
 func installNpmPackages(names []string) error {
