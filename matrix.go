@@ -174,7 +174,7 @@ func (m *Matrix) RemoveOldAssets() {
 
 func installNpmPackages(names []string) error {
 	for _, n := range names {
-		if _, err := os.Stat("node_modules/" + n); err == nil {
+		if _, err := os.Stat("node_modules/" + strings.Split(n, "@")[0]); err == nil {
 			continue
 		}
 		cmd := exec.Command("npm", "install", n)
