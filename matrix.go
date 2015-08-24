@@ -304,22 +304,23 @@ func (m *Matrix) compileTree(tree []Asset) error {
 	type result struct {
 		io.Reader
 		error
+		idx int
 	}
 	results := make(chan result)
 	compileAsset := func(i int, a Asset) {
 		r, err := a.Compile()
-		results <- result{r, err}
+		results <- result{r, err, i}
 	}
 	for i, a := range tree {
 		go compileAsset(i, a)
 	}
 	readers := make([]io.Reader, len(tree))
-	for i := range tree {
+	for _ = range tree {
 		res := <-results
 		if res.error != nil {
 			return res.error
 		}
-		readers[i] = res.Reader
+		readers[res.idx] = res.Reader
 	}
 	outputPath := tree[len(tree)-1].OutputPath()
 	manifestKey := outputPath
