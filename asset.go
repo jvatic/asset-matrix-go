@@ -32,12 +32,12 @@ func NewAsset(r *AssetRoot, p string) Asset {
 		ap := strings.TrimSuffix(p, "."+strings.Join(exts[i:], ".")) + "." + ext
 		switch ext {
 		case "js":
-			if r.ESLint {
+			if r.ESLintConfigPath != "" {
 				a = NewESLintAsset(r, a, ap)
 			}
 			a = NewJavaScriptAsset(r, a, ap)
 		case "jsx":
-			if r.ESLint {
+			if r.ESLintConfigPath != "" {
 				a = NewESLintAsset(r, a, ap)
 			}
 			a = NewJSXAsset(r, a, ap)
