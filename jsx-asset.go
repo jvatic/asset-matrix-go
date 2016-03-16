@@ -74,7 +74,7 @@ func (a *JSXAsset) Compile() (io.Reader, error) {
 	}
 
 	var buf bytes.Buffer
-	cmd := exec.Command("node_modules/babel-cli/bin/babel.js", "--plugins", "transform-react-jsx")
+	cmd := exec.Command("node_modules/react-tools/bin/jsx", "--es6module")
 	cmd.Stdin = data
 	cmd.Stdout = &buf
 	cmd.Stderr = os.Stderr

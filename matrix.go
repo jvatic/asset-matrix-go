@@ -204,8 +204,7 @@ func (m *Matrix) installDeps() error {
 		"recast@0.10.30",
 		"es6-promise@3.0.2",
 		"node-sass@3.2.0",
-		"babel-cli@6.6.5",
-		"babel-plugin-transform-react-jsx@6.6.5",
+		"react-tools@0.13.3",
 		"eslint@1.6.0",
 		"eslint-plugin-react@3.5.1",
 	})
