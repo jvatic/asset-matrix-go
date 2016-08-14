@@ -2,10 +2,11 @@ package assetmatrix
 
 import (
 	"io"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
+
+	log "gopkg.in/inconshreveable/log15.v2"
 )
 
 type ESLintAsset struct {
@@ -13,6 +14,7 @@ type ESLintAsset struct {
 	r        *AssetRoot
 	p        string
 	indexKey string
+	l        log.Logger
 }
 
 func (a *ESLintAsset) OutputExt() string {
@@ -22,7 +24,8 @@ func (a *ESLintAsset) OutputExt() string {
 func (a *ESLintAsset) OutputPath() string {
 	p, err := a.RelPath()
 	if err != nil {
-		log.Fatal(err)
+		a.l.Error("Error getting rel path", "err", err)
+		os.Exit(1)
 	}
 	return p
 }
