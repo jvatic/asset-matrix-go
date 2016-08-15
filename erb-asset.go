@@ -73,6 +73,8 @@ func (a *ERBAsset) Compile() (io.Reader, error) {
 		return nil, err
 	}
 
+	a.l.Info("Compiling ERB")
+
 	var buf bytes.Buffer
 	var cmd *exec.Cmd
 	if _, err := os.Stat("Gemfile"); err == nil {

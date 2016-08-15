@@ -141,6 +141,8 @@ func (a *JavaScriptAsset) Compile() (io.Reader, error) {
 		return nil, err
 	}
 
+	a.l.Info("Transforming JavaScript")
+
 	var buf bytes.Buffer
 	cmd := exec.Command("node", a.transformerJSPath)
 	cmd.Stdin = data

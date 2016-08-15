@@ -81,6 +81,8 @@ func (a *SCSSAsset) Compile() (io.Reader, error) {
 		return nil, err
 	}
 
+	a.l.Info("Compiling SCSS")
+
 	t, err := ioutil.TempFile("", filepath.Base(a.Path()))
 	if err != nil {
 		return nil, err

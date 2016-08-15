@@ -63,6 +63,7 @@ func (a *ESLintAsset) ImportPaths() []string {
 }
 
 func (a *ESLintAsset) Compile() (io.Reader, error) {
+	a.l.Info("Running ESLint")
 	cmd := exec.Command("node_modules/eslint/bin/eslint.js", "--config", a.r.ESLintConfigPath, a.p)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
