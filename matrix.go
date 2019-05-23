@@ -207,7 +207,7 @@ func (m *Matrix) installDeps() error {
 	return installNpmPackages([]string{
 		"recast@0.10.30",
 		"es6-promise@3.0.2",
-		"node-sass@3.8.0",
+		"node-sass@4.12.0",
 		"babel-cli@6.11.4",
 		"babel-plugin-transform-react-jsx@6.8",
 		"eslint@1.6.0",
@@ -317,7 +317,12 @@ var AssetNotFoundError = errors.New("Asset not found")
 
 func (m *Matrix) findAsset(key string) (Asset, error) {
 	for _, r := range m.config.Paths {
-		if a, ok := r.assetIndex[key]; ok {
+		k := key
+		rootBasePath, _ := filepath.Abs(r.Path)
+		if relPath, err := filepath.Rel(rootBasePath, key); err == nil {
+			k = relPath
+		}
+		if a, ok := r.assetIndex[k]; ok {
 			return a, nil
 		}
 	}
